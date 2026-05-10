@@ -8,14 +8,16 @@ info:
     This backend supports React Native, React Web, MongoDB, and MQTT-based IoT architecture.
 
 servers:
+  - url: https://api.archidtech.in
+    description: Utho cloud / production API server
   - url: http://localhost:4000
     description: Local development server
-  - url: https://api.archidtech.in
-    description: Production API server
 
 tags:
   - name: Health
     description: Server health and status APIs
+  - name: Auth
+    description: Authentication APIs for signup, login, and current user
 
 paths:
   /health:
@@ -30,26 +32,372 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Server is healthy
-                  data:
-                    type: object
-                    properties:
-                      appName:
-                        type: string
-                        example: Archid Flow Server V4
-                      environment:
-                        type: string
-                        example: development
-                      apiVersion:
-                        type: string
-                        example: v1
-                      timestamp:
-                        type: string
-                        example: "2026-05-10T10:00:00.000Z"
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/v1/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Register a new customer admin
+      description: >
+        Creates a new customer admin account. In Archid Flow V4, the default signup user
+        is a customer admin, meaning the user can purchase, claim, own, manage, and share IoT devices.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+            example:
+              name: Suresh
+              mobile: "9962577674"
+              email: suresh@example.com
+              password: "123456"
+              confirmPassword: "123456"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserResponse"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: User already exists with this mobile number or email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      description: Login using email or mobile number and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              loginWithEmail:
+                summary: Login using email
+                value:
+                  identifier: suresh@example.com
+                  password: "123456"
+              loginWithMobile:
+                summary: Login using mobile number
+                value:
+                  identifier: "9962577674"
+                  password: "123456"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User account is inactive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/auth/me:
+    get:
+      tags:
+        - Auth
+      summary: Get current logged-in user
+      description: Returns the current user based on the JWT Bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User account is inactive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter JWT token as Bearer token.
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Server is healthy
+        data:
+          type: object
+          properties:
+            appName:
+              type: string
+              example: Archid Flow Server V4
+            appCode:
+              type: string
+              example: archid-flow
+            environment:
+              type: string
+              example: development
+            apiVersion:
+              type: string
+              example: v1
+            timestamp:
+              type: string
+              example: "2026-05-10T10:00:00.000Z"
+
+    SignupRequest:
+      type: object
+      required:
+        - name
+        - mobile
+        - email
+        - password
+        - confirmPassword
+      properties:
+        name:
+          type: string
+          example: Suresh
+        mobile:
+          type: string
+          example: "9962577674"
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        password:
+          type: string
+          format: password
+          example: "123456"
+        confirmPassword:
+          type: string
+          format: password
+          example: "123456"
+
+    LoginRequest:
+      type: object
+      required:
+        - identifier
+        - password
+      properties:
+        identifier:
+          type: string
+          example: suresh@example.com
+          description: Email or mobile number
+        password:
+          type: string
+          format: password
+          example: "123456"
+
+    UserRole:
+      type: string
+      description: >
+        User role in the Archid Flow platform.
+        super_admin is ArchidTech/platform admin.
+        customer_admin is the device owner.
+        customer_control_user can control shared devices.
+        customer_view_user can only view shared device status.
+      enum:
+        - super_admin
+        - customer_admin
+        - customer_control_user
+        - customer_view_user
+      example: customer_admin
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65f1234567890abcdef12345
+        name:
+          type: string
+          example: Suresh
+        mobile:
+          type: string
+          example: "9962577674"
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        role:
+          $ref: "#/components/schemas/UserRole"
+        profile:
+          type: object
+          properties:
+            firstName:
+              type: string
+              example: Suresh
+            lastName:
+              type: string
+              example: Kumar
+            email:
+              type: string
+              format: email
+              example: suresh@example.com
+            phone:
+              type: object
+              properties:
+                countryCode:
+                  type: string
+                  example: "+91"
+                number:
+                  type: string
+                  example: "9962577674"
+            address:
+              type: object
+              properties:
+                addressLine1:
+                  type: string
+                  example: Anna Nagar
+                district:
+                  type: string
+                  example: Chennai
+                city:
+                  type: string
+                  example: Chennai
+                state:
+                  type: string
+                  example: Tamil Nadu
+                pincode:
+                  type: string
+                  example: "600040"
+                country:
+                  type: string
+                  example: India
+            professionalDetails:
+              type: object
+              properties:
+                companyName:
+                  type: string
+                  example: ArchidTech
+                siteName:
+                  type: string
+                  example: Chennai Office
+            isVerified:
+              type: boolean
+              example: false
+            verifiedBy:
+              type: string
+              nullable: true
+              example: null
+            verifiedAt:
+              type: string
+              nullable: true
+              example: null
+        company:
+          type: string
+          nullable: true
+          example: null
+        isActive:
+          type: boolean
+          example: true
+        lastLoginAt:
+          type: string
+          nullable: true
+          example: "2026-05-10T10:00:00.000Z"
+        createdAt:
+          type: string
+          example: "2026-05-10T10:00:00.000Z"
+        updatedAt:
+          type: string
+          example: "2026-05-10T10:00:00.000Z"
+
+    AuthUserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: User registered successfully
+        data:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Login successful
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            user:
+              $ref: "#/components/schemas/User"
+
+    ValidationErrorItem:
+      type: object
+      properties:
+        field:
+          type: string
+          example: email
+        message:
+          type: string
+          example: Valid email is required
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Validation failed
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationErrorItem"

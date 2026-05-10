@@ -12,6 +12,8 @@ const sendResponse = require("./common/utils/sendResponse");
 const notFoundMiddleware = require("./common/middleware/notFound.middleware");
 const errorMiddleware = require("./common/middleware/error.middleware");
 
+const authRoutes = require("./modules/auth/auth.routes");
+
 const app = express();
 
 // ==========================
@@ -27,9 +29,11 @@ app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
 // ==========================
 // CORS
 // ==========================
+const corsOrigin = config.corsOrigin || "*";
+
 app.use(
   cors({
-    origin: config.corsOrigin === "*" ? "*" : config.corsOrigin.split(","),
+    origin: corsOrigin === "*" ? "*" : corsOrigin.split(","),
     credentials: true
   })
 );
@@ -81,6 +85,11 @@ app.get("/", (req, res) => {
 });
 
 // ==========================
+// API ROUTES
+// ==========================
+app.use(`/api/${config.apiVersion}/auth`, authRoutes);
+
+// ==========================
 // SWAGGER DOCS
 // ==========================
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -92,16 +101,14 @@ app.get("/api-docs.json", (req, res) => {
 // ==========================
 // FUTURE API ROUTES
 // ==========================
-// Phase 02 onwards:
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/users", userRoutes);
-// app.use("/api/v1/companies", companyRoutes);
-// app.use("/api/v1/sites", siteRoutes);
-// app.use("/api/v1/device-types", deviceTypeRoutes);
-// app.use("/api/v1/devices", deviceRoutes);
-// app.use("/api/v1/provisioning", provisioningRoutes);
-// app.use("/api/v1/device-sharing", deviceSharingRoutes);
-// app.use("/api/v1/mqtt-access", mqttAccessRoutes);
+// app.use(`/api/${config.apiVersion}/users`, userRoutes);
+// app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
+// app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
+// app.use(`/api/${config.apiVersion}/device-types`, deviceTypeRoutes);
+// app.use(`/api/${config.apiVersion}/devices`, deviceRoutes);
+// app.use(`/api/${config.apiVersion}/provisioning`, provisioningRoutes);
+// app.use(`/api/${config.apiVersion}/device-sharing`, deviceSharingRoutes);
+// app.use(`/api/${config.apiVersion}/mqtt-access`, mqttAccessRoutes);
 
 // ==========================
 // 404 HANDLER

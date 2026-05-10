@@ -27,6 +27,7 @@ const config = {
 
   // ✅ This line fixes your current error
   corsOrigin: process.env.CORS_ORIGIN || "*",
+  showErrorStack: toBoolean(process.env.SHOW_ERROR_STACK, false),
 
   mongoUri: process.env.MONGODB_URI,
 

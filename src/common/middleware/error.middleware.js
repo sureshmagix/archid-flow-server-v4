@@ -12,7 +12,9 @@ const errorMiddleware = (err, req, res, next) => {
     response.errors = err.errors;
   }
 
-  if (config.nodeEnv !== "production") {
+  // Show stack only when explicitly enabled.
+  // Keep this false on Utho/cloud testing and production.
+  if (config.showErrorStack === true) {
     response.stack = err.stack;
   }
 

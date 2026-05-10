@@ -1,0 +1,11 @@
+const DEVICE_PERMISSIONS = {
+  VIEW: "view",
+  CONTROL: "control"
+};
+
+const DEVICE_PERMISSION_VALUES = Object.values(DEVICE_PERMISSIONS);
+
+module.exports = {
+  DEVICE_PERMISSIONS,
+  DEVICE_PERMISSION_VALUES
+};
