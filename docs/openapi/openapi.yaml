@@ -1,0 +1,55 @@
+openapi: 3.0.3
+
+info:
+  title: Archid Flow Server V4 API
+  version: 1.0.0
+  description: >
+    Professional REST API documentation for Archid Flow IoT backend.
+    This backend supports React Native, React Web, MongoDB, and MQTT-based IoT architecture.
+
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+  - url: https://api.archidtech.in
+    description: Production API server
+
+tags:
+  - name: Health
+    description: Server health and status APIs
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Check server health
+      description: Returns server status, environment, API version, and timestamp.
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Server is healthy
+                  data:
+                    type: object
+                    properties:
+                      appName:
+                        type: string
+                        example: Archid Flow Server V4
+                      environment:
+                        type: string
+                        example: development
+                      apiVersion:
+                        type: string
+                        example: v1
+                      timestamp:
+                        type: string
+                        example: "2026-05-10T10:00:00.000Z"

@@ -1,0 +1,42 @@
+{
+  "name": "archid-flow-server-v4",
+  "version": "1.0.0",
+  "description": "Archid Flow IoT backend v4 - REST API, MongoDB, MQTT-ready architecture",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "pm2:start": "pm2 start src/server.js --name archid-flow-v4",
+    "pm2:restart": "pm2 restart archid-flow-v4",
+    "pm2:stop": "pm2 stop archid-flow-v4",
+    "pm2:delete": "pm2 delete archid-flow-v4",
+    "pm2:logs": "pm2 logs archid-flow-v4",
+    "pm2:status": "pm2 status",
+    "pm2:save": "pm2 save"
+  },
+  "keywords": [
+    "iot",
+    "mqtt",
+    "nodejs",
+    "express",
+    "mongodb",
+    "archid"
+  ],
+  "author": "ArchidTech",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.2.3",
+    "morgan": "^1.10.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
