@@ -22,6 +22,10 @@ tags:
     description: Logged-in user profile APIs
   - name: Users
     description: Super admin user management APIs
+  - name: Companies
+    description: Company/customer organization management APIs
+  - name: Sites
+    description: Customer site/location management APIs
 
 paths:
   /health:
@@ -542,6 +546,564 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1/companies:
+    post:
+      tags:
+        - Companies
+      summary: Create company
+      description: >
+        Creates a customer company. This endpoint is restricted to super_admin.
+        Company code is unique and stored in uppercase.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+            example:
+              name: Archid Demo Customer Pvt Ltd
+              code: ARCHID-DEMO
+              email: admin@archiddemo.com
+              phone:
+                countryCode: "+91"
+                number: "9876543210"
+              address:
+                addressLine1: Demo Tech Park
+                addressLine2: ""
+                district: Chennai
+                city: Chennai
+                state: Tamil Nadu
+                pincode: "600040"
+                country: India
+              status: active
+              notes: Demo company created during Phase 04 testing
+      responses:
+        "201":
+          description: Company created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyResponse"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can create company.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Company code already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      tags:
+        - Companies
+      summary: List companies
+      description: >
+        Lists companies. super_admin can view all companies.
+        Customer users can view only their assigned company.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: Page number
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: Number of companies per page. Maximum allowed is 100.
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/CompanyStatus"
+          description: Filter companies by status
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: demo
+          description: Search by company name, code, email, phone, city, or state
+      responses:
+        "200":
+          description: Companies fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyListResponse"
+        "400":
+          description: Invalid filter query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/companies/{companyId}:
+    get:
+      tags:
+        - Companies
+      summary: Get company by ID
+      description: >
+        Fetches one company by MongoDB ObjectId. super_admin can access any company.
+        Customer users can access only their assigned company.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      responses:
+        "200":
+          description: Company fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyResponse"
+        "400":
+          description: Invalid company ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. User cannot access this company.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      tags:
+        - Companies
+      summary: Update company
+      description: Updates company details. This endpoint is restricted to super_admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyRequest"
+            example:
+              name: Archid Demo Customer Pvt Ltd
+              status: active
+              notes: Updated from Phase 04 API testing
+      responses:
+        "200":
+          description: Company updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyResponse"
+        "400":
+          description: Validation failed or invalid company ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can update company.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Company code already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/companies/{companyId}/assign-user:
+    patch:
+      tags:
+        - Companies
+      summary: Assign user to company
+      description: >
+        Assigns an existing non-super-admin user to a company.
+        Optional role can be sent to set the customer's role.
+        This endpoint is restricted to super_admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignUserToCompanyRequest"
+            example:
+              userId: 65f1234567890abcdef12345
+              role: customer_admin
+      responses:
+        "200":
+          description: User assigned to company successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserResponse"
+        "400":
+          description: Invalid user ID, invalid company ID, or protected role assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can assign users to company.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Company or user not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/sites:
+    post:
+      tags:
+        - Sites
+      summary: Create site
+      description: >
+        Creates a site under a company. super_admin must send company ID.
+        customer_admin can create a site only under their assigned company.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSiteRequest"
+            example:
+              company: 65f1234567890abcdef12345
+              name: Chennai Main Site
+              code: CHN-MAIN
+              siteType: office
+              contactPerson:
+                name: Site Manager
+                email: site@archiddemo.com
+                phone: "9876543210"
+              address:
+                addressLine1: Demo Site Address
+                addressLine2: ""
+                district: Chennai
+                city: Chennai
+                state: Tamil Nadu
+                pincode: "600040"
+                country: India
+              location:
+                latitude: 13.0827
+                longitude: 80.2707
+              timezone: Asia/Kolkata
+              status: active
+              notes: Demo site created during Phase 04 testing
+      responses:
+        "201":
+          description: Site created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteResponse"
+        "400":
+          description: Validation failed or company is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin or customer_admin can create sites.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Site code already exists for this company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      tags:
+        - Sites
+      summary: List sites
+      description: >
+        Lists sites. super_admin can list all sites or filter by company.
+        Customer users can list only sites under their assigned company.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: Page number
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: Number of sites per page. Maximum allowed is 100.
+        - in: query
+          name: company
+          required: false
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+          description: Filter sites by company ID. Mainly for super_admin.
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/SiteStatus"
+          description: Filter sites by status
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: chennai
+          description: Search by site name, code, type, contact person, city, or state
+      responses:
+        "200":
+          description: Sites fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteListResponse"
+        "400":
+          description: Invalid filter query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/sites/{siteId}:
+    get:
+      tags:
+        - Sites
+      summary: Get site by ID
+      description: >
+        Fetches one site by MongoDB ObjectId. super_admin can access any site.
+        Customer users can access only sites under their assigned company.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: siteId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      responses:
+        "200":
+          description: Site fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteResponse"
+        "400":
+          description: Invalid site ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. User cannot access this site.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Site not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      tags:
+        - Sites
+      summary: Update site
+      description: >
+        Updates site details. super_admin can update any site.
+        customer_admin can update only sites under their assigned company.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: siteId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSiteRequest"
+            example:
+              name: Chennai Main Site
+              status: active
+              notes: Updated from Phase 04 API testing
+      responses:
+        "200":
+          description: Site updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteResponse"
+        "400":
+          description: Validation failed or invalid site ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. User cannot update this site.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Site or company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Site code already exists for this company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -645,6 +1207,38 @@ components:
         - inactive
         - blocked
       example: active
+
+    CompanyStatus:
+      type: string
+      description: Company account status.
+      enum:
+        - active
+        - inactive
+        - blocked
+      example: active
+
+    SiteStatus:
+      type: string
+      description: Site status.
+      enum:
+        - active
+        - inactive
+      example: active
+
+    SiteType:
+      type: string
+      description: Type/category of customer site.
+      enum:
+        - office
+        - parking
+        - factory
+        - warehouse
+        - residential
+        - mall
+        - hospital
+        - hotel
+        - other
+      example: office
 
     ProfilePhone:
       type: object
@@ -754,7 +1348,7 @@ components:
         company:
           type: string
           nullable: true
-          example: null
+          example: 65f1234567890abcdef12345
         lastLoginAt:
           type: string
           format: date-time
@@ -897,6 +1491,431 @@ components:
       properties:
         accountStatus:
           $ref: "#/components/schemas/UserAccountStatus"
+
+    CompanyPhone:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: "+91"
+        number:
+          type: string
+          example: "9876543210"
+
+    CompanyAddress:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          example: Demo Tech Park
+        addressLine2:
+          type: string
+          example: ""
+        district:
+          type: string
+          example: Chennai
+        city:
+          type: string
+          example: Chennai
+        state:
+          type: string
+          example: Tamil Nadu
+        pincode:
+          type: string
+          example: "600040"
+        country:
+          type: string
+          example: India
+
+    Company:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65f1234567890abcdef12345
+        name:
+          type: string
+          example: Archid Demo Customer Pvt Ltd
+        code:
+          type: string
+          example: ARCHID-DEMO
+        email:
+          type: string
+          format: email
+          example: admin@archiddemo.com
+        phone:
+          $ref: "#/components/schemas/CompanyPhone"
+        address:
+          $ref: "#/components/schemas/CompanyAddress"
+        status:
+          $ref: "#/components/schemas/CompanyStatus"
+        notes:
+          type: string
+          example: Demo company
+        createdBy:
+          type: string
+          nullable: true
+          example: 65f1234567890abcdef12345
+        updatedBy:
+          type: string
+          nullable: true
+          example: 65f1234567890abcdef12345
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-05-10T10:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-05-10T10:00:00.000Z"
+
+    CompanySummary:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65f1234567890abcdef12345
+        name:
+          type: string
+          example: Archid Demo Customer Pvt Ltd
+        code:
+          type: string
+          example: ARCHID-DEMO
+        status:
+          $ref: "#/components/schemas/CompanyStatus"
+
+    CreateCompanyRequest:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: Archid Demo Customer Pvt Ltd
+        code:
+          type: string
+          minLength: 2
+          maxLength: 40
+          example: ARCHID-DEMO
+        email:
+          type: string
+          format: email
+          example: admin@archiddemo.com
+        phone:
+          $ref: "#/components/schemas/CompanyPhone"
+        address:
+          $ref: "#/components/schemas/CompanyAddress"
+        status:
+          $ref: "#/components/schemas/CompanyStatus"
+        notes:
+          type: string
+          example: Demo company created during Phase 04 testing
+
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: Archid Demo Customer Pvt Ltd
+        code:
+          type: string
+          minLength: 2
+          maxLength: 40
+          example: ARCHID-DEMO
+        email:
+          type: string
+          format: email
+          example: admin@archiddemo.com
+        phone:
+          $ref: "#/components/schemas/CompanyPhone"
+        address:
+          $ref: "#/components/schemas/CompanyAddress"
+        status:
+          $ref: "#/components/schemas/CompanyStatus"
+        notes:
+          type: string
+          example: Updated company notes
+
+    AssignUserToCompanyRequest:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+          example: 65f1234567890abcdef12345
+        role:
+          type: string
+          enum:
+            - customer_admin
+            - customer_control_user
+            - customer_view_user
+          example: customer_admin
+
+    CompanyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Company fetched successfully
+        data:
+          type: object
+          properties:
+            company:
+              $ref: "#/components/schemas/Company"
+
+    CompanyListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Companies fetched successfully
+        data:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 10
+            totalPages:
+              type: integer
+              example: 1
+            companies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Company"
+
+    SiteContactPerson:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Site Manager
+        email:
+          type: string
+          format: email
+          example: site@archiddemo.com
+        phone:
+          type: string
+          example: "9876543210"
+
+    SiteAddress:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          example: Demo Site Address
+        addressLine2:
+          type: string
+          example: ""
+        district:
+          type: string
+          example: Chennai
+        city:
+          type: string
+          example: Chennai
+        state:
+          type: string
+          example: Tamil Nadu
+        pincode:
+          type: string
+          example: "600040"
+        country:
+          type: string
+          example: India
+
+    SiteLocation:
+      type: object
+      properties:
+        latitude:
+          type: number
+          nullable: true
+          example: 13.0827
+        longitude:
+          type: number
+          nullable: true
+          example: 80.2707
+
+    Site:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65f1234567890abcdef12345
+        company:
+          oneOf:
+            - type: string
+              example: 65f1234567890abcdef12345
+            - $ref: "#/components/schemas/CompanySummary"
+        name:
+          type: string
+          example: Chennai Main Site
+        code:
+          type: string
+          example: CHN-MAIN
+        siteType:
+          $ref: "#/components/schemas/SiteType"
+        contactPerson:
+          $ref: "#/components/schemas/SiteContactPerson"
+        address:
+          $ref: "#/components/schemas/SiteAddress"
+        location:
+          $ref: "#/components/schemas/SiteLocation"
+        timezone:
+          type: string
+          example: Asia/Kolkata
+        status:
+          $ref: "#/components/schemas/SiteStatus"
+        notes:
+          type: string
+          example: Demo site
+        createdBy:
+          type: string
+          nullable: true
+          example: 65f1234567890abcdef12345
+        updatedBy:
+          type: string
+          nullable: true
+          example: 65f1234567890abcdef12345
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-05-10T10:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-05-10T10:00:00.000Z"
+
+    CreateSiteRequest:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        company:
+          type: string
+          description: Required for super_admin. For customer_admin, assigned company is used automatically.
+          example: 65f1234567890abcdef12345
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: Chennai Main Site
+        code:
+          type: string
+          minLength: 2
+          maxLength: 40
+          example: CHN-MAIN
+        siteType:
+          $ref: "#/components/schemas/SiteType"
+        contactPerson:
+          $ref: "#/components/schemas/SiteContactPerson"
+        address:
+          $ref: "#/components/schemas/SiteAddress"
+        location:
+          $ref: "#/components/schemas/SiteLocation"
+        timezone:
+          type: string
+          example: Asia/Kolkata
+        status:
+          $ref: "#/components/schemas/SiteStatus"
+        notes:
+          type: string
+          example: Demo site created during Phase 04 testing
+
+    UpdateSiteRequest:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Only super_admin can move a site to another company.
+          example: 65f1234567890abcdef12345
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: Chennai Main Site
+        code:
+          type: string
+          minLength: 2
+          maxLength: 40
+          example: CHN-MAIN
+        siteType:
+          $ref: "#/components/schemas/SiteType"
+        contactPerson:
+          $ref: "#/components/schemas/SiteContactPerson"
+        address:
+          $ref: "#/components/schemas/SiteAddress"
+        location:
+          $ref: "#/components/schemas/SiteLocation"
+        timezone:
+          type: string
+          example: Asia/Kolkata
+        status:
+          $ref: "#/components/schemas/SiteStatus"
+        notes:
+          type: string
+          example: Updated site notes
+
+    SiteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Site fetched successfully
+        data:
+          type: object
+          properties:
+            site:
+              $ref: "#/components/schemas/Site"
+
+    SiteListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Sites fetched successfully
+        data:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 10
+            totalPages:
+              type: integer
+              example: 1
+            sites:
+              type: array
+              items:
+                $ref: "#/components/schemas/Site"
 
     ValidationErrorItem:
       type: object

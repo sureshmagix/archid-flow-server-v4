@@ -19,6 +19,10 @@ const authRoutes = require("./modules/auth/auth.routes");
 const profileRoutes = require("./modules/profile/profile.routes");
 const userRoutes = require("./modules/users/user.routes");
 
+// Phase 04 Routes
+const companyRoutes = require("./modules/companies/company.routes");
+const siteRoutes = require("./modules/sites/site.routes");
+
 const app = express();
 
 // ==========================
@@ -93,7 +97,14 @@ app.get("/", (req, res) => {
   return sendResponse(res, 200, "Welcome to Archid Flow Server V4", {
     docs: "/api-docs",
     health: "/health",
-    apiVersion: config.apiVersion
+    apiVersion: config.apiVersion,
+    routes: {
+      auth: `/api/${config.apiVersion}/auth`,
+      profile: `/api/${config.apiVersion}/profile`,
+      users: `/api/${config.apiVersion}/users`,
+      companies: `/api/${config.apiVersion}/companies`,
+      sites: `/api/${config.apiVersion}/sites`
+    }
   });
 });
 
@@ -110,6 +121,7 @@ app.get("/favicon.ico", (req, res) => {
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
+
   return res.send(`User-agent: *
 Allow: /
 
@@ -119,6 +131,7 @@ Sitemap: ${config.apiBaseUrl}/sitemap.xml
 
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml");
+
   return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -138,6 +151,7 @@ app.get("/sitemap.xml", (req, res) => {
   </url>
 </urlset>`);
 });
+
 // ==========================
 // API ROUTES
 // ==========================
@@ -145,10 +159,16 @@ app.get("/sitemap.xml", (req, res) => {
 // /api/v1/auth
 // /api/v1/profile
 // /api/v1/users
+// /api/v1/companies
+// /api/v1/sites
 
 app.use(`/api/${config.apiVersion}/auth`, authRoutes);
 app.use(`/api/${config.apiVersion}/profile`, profileRoutes);
 app.use(`/api/${config.apiVersion}/users`, userRoutes);
+
+// Phase 04 Routes
+app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
+app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
 
 // ==========================
 // SWAGGER DOCS
@@ -162,8 +182,6 @@ app.get("/api-docs.json", (req, res) => {
 // ==========================
 // FUTURE API ROUTES
 // ==========================
-// app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
-// app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
 // app.use(`/api/${config.apiVersion}/device-types`, deviceTypeRoutes);
 // app.use(`/api/${config.apiVersion}/devices`, deviceRoutes);
 // app.use(`/api/${config.apiVersion}/provisioning`, provisioningRoutes);
