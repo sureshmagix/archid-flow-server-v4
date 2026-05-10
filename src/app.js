@@ -12,9 +12,22 @@ const sendResponse = require("./common/utils/sendResponse");
 const notFoundMiddleware = require("./common/middleware/notFound.middleware");
 const errorMiddleware = require("./common/middleware/error.middleware");
 
+// ==========================
+// MODULE ROUTES
+// ==========================
 const authRoutes = require("./modules/auth/auth.routes");
+const profileRoutes = require("./modules/profile/profile.routes");
+const userRoutes = require("./modules/users/user.routes");
 
 const app = express();
+
+// ==========================
+// TRUST PROXY
+// ==========================
+// Required because production runs behind Nginx reverse proxy.
+// Flow: Client -> Nginx -> Express
+// This fixes express-rate-limit X-Forwarded-For warning.
+app.set("trust proxy", 1);
 
 // ==========================
 // SECURITY MIDDLEWARE
@@ -85,9 +98,57 @@ app.get("/", (req, res) => {
 });
 
 // ==========================
+// BROWSER / SEO DEFAULT ROUTES
+// ==========================
+// Browsers automatically request /favicon.ico.
+// Search engines or tools may request /robots.txt and /sitemap.xml.
+// These routes prevent unnecessary 404 error logs.
+
+app.get("/favicon.ico", (req, res) => {
+  return res.status(204).end();
+});
+
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  return res.send(`User-agent: *
+Allow: /
+
+Sitemap: ${config.apiBaseUrl}/sitemap.xml
+`);
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  res.type("application/xml");
+  return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${config.apiBaseUrl}/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${config.apiBaseUrl}/health</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${config.apiBaseUrl}/api-docs</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>`);
+});
+// ==========================
 // API ROUTES
 // ==========================
+// Example final URL when apiVersion = v1:
+// /api/v1/auth
+// /api/v1/profile
+// /api/v1/users
+
 app.use(`/api/${config.apiVersion}/auth`, authRoutes);
+app.use(`/api/${config.apiVersion}/profile`, profileRoutes);
+app.use(`/api/${config.apiVersion}/users`, userRoutes);
 
 // ==========================
 // SWAGGER DOCS
@@ -95,13 +156,12 @@ app.use(`/api/${config.apiVersion}/auth`, authRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/api-docs.json", (req, res) => {
-  res.json(swaggerDocument);
+  return res.json(swaggerDocument);
 });
 
 // ==========================
 // FUTURE API ROUTES
 // ==========================
-// app.use(`/api/${config.apiVersion}/users`, userRoutes);
 // app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
 // app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
 // app.use(`/api/${config.apiVersion}/device-types`, deviceTypeRoutes);

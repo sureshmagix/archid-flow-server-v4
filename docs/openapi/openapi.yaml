@@ -18,6 +18,10 @@ tags:
     description: Server health and status APIs
   - name: Auth
     description: Authentication APIs for signup, login, and current user
+  - name: Profile
+    description: Logged-in user profile APIs
+  - name: Users
+    description: Super admin user management APIs
 
 paths:
   /health:
@@ -117,7 +121,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User account is inactive
+          description: User account is inactive or blocked
           content:
             application/json:
               schema:
@@ -145,7 +149,394 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User account is inactive
+          description: User account is inactive or blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/profile:
+    get:
+      tags:
+        - Profile
+      summary: Get logged-in user profile
+      description: Returns the profile of the currently logged-in user.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      tags:
+        - Profile
+      summary: Update logged-in user profile
+      description: >
+        Updates profile details for the currently logged-in user.
+        Restricted fields like password, role, accountStatus, isVerified, verifiedBy, and verifiedAt cannot be updated from this endpoint.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateRequest"
+            example:
+              name: Suresh Babu
+              firstName: Suresh
+              lastName: Babu
+              email: suresh@example.com
+              mobile: "9962577674"
+              phone:
+                countryCode: "+91"
+                number: "9962577674"
+              address:
+                addressLine1: Anna Nagar
+                addressLine2: ""
+                district: Chennai
+                city: Chennai
+                state: Tamil Nadu
+                pincode: "600040"
+                country: India
+              professionalDetails:
+                companyName: ArchidTech
+                designation: Founder
+                department: IoT
+              avatarUrl: ""
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          description: Invalid profile update request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email or mobile number already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: >
+        Lists platform users. This endpoint is currently restricted to super_admin users.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: Page number
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: Number of users per page. Maximum allowed is 100.
+        - in: query
+          name: role
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserRole"
+          description: Filter users by role
+        - in: query
+          name: accountStatus
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserAccountStatus"
+          description: Filter users by account status
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: suresh
+          description: Search by name, mobile, email, profile name, phone, or company name
+      responses:
+        "200":
+          description: Users fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "400":
+          description: Invalid filter query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can access this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Fetches one user by MongoDB ObjectId. This endpoint is restricted to super_admin users.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      responses:
+        "200":
+          description: User fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can access this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/users/{userId}/verify:
+    patch:
+      tags:
+        - Users
+      summary: Verify or unverify user
+      description: >
+        Verifies or removes verification for a user profile.
+        If isVerified is not sent, the system treats it as true.
+        This endpoint is restricted to super_admin users.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyUserRequest"
+            example:
+              isVerified: true
+      responses:
+        "200":
+          description: User verification updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can access this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/users/{userId}/role:
+    patch:
+      tags:
+        - Users
+      summary: Update user role
+      description: >
+        Updates a user's role. This endpoint is restricted to super_admin users.
+        A super_admin cannot change their own role from this endpoint.
+        The system also protects against removing the last remaining super_admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRoleRequest"
+            example:
+              role: customer_control_user
+      responses:
+        "200":
+          description: User role updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          description: Invalid role, invalid user ID, or protected action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can access this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/users/{userId}/status:
+    patch:
+      tags:
+        - Users
+      summary: Update user account status
+      description: >
+        Updates a user's account status. This endpoint is restricted to super_admin users.
+        A super_admin cannot change their own status from this endpoint.
+        The system also protects against disabling or blocking the last remaining super_admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserStatusRequest"
+            example:
+              accountStatus: active
+      responses:
+        "200":
+          description: User status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          description: Invalid account status, invalid user ID, or protected action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden. Only super_admin can access this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
           content:
             application/json:
               schema:
@@ -236,15 +627,107 @@ components:
       description: >
         User role in the Archid Flow platform.
         super_admin is ArchidTech/platform admin.
-        customer_admin is the device owner.
-        customer_control_user can control shared devices.
-        customer_view_user can only view shared device status.
+        customer_admin is the device owner or customer admin.
+        customer_control_user can control assigned or shared devices.
+        customer_view_user can only view assigned or shared device status.
       enum:
         - super_admin
         - customer_admin
         - customer_control_user
         - customer_view_user
       example: customer_admin
+
+    UserAccountStatus:
+      type: string
+      description: User account status.
+      enum:
+        - active
+        - inactive
+        - blocked
+      example: active
+
+    ProfilePhone:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: "+91"
+        number:
+          type: string
+          example: "9962577674"
+
+    ProfileAddress:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          example: Anna Nagar
+        addressLine2:
+          type: string
+          example: ""
+        district:
+          type: string
+          example: Chennai
+        city:
+          type: string
+          example: Chennai
+        state:
+          type: string
+          example: Tamil Nadu
+        pincode:
+          type: string
+          example: "600040"
+        country:
+          type: string
+          example: India
+
+    ProfessionalDetails:
+      type: object
+      properties:
+        companyName:
+          type: string
+          example: ArchidTech
+        designation:
+          type: string
+          example: Founder
+        department:
+          type: string
+          example: IoT
+
+    UserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Suresh
+        lastName:
+          type: string
+          example: Babu
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        phone:
+          $ref: "#/components/schemas/ProfilePhone"
+        address:
+          $ref: "#/components/schemas/ProfileAddress"
+        professionalDetails:
+          $ref: "#/components/schemas/ProfessionalDetails"
+        avatarUrl:
+          type: string
+          example: ""
+        isVerified:
+          type: boolean
+          example: false
+        verifiedBy:
+          type: string
+          nullable: true
+          example: null
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
 
     User:
       type: object
@@ -254,7 +737,7 @@ components:
           example: 65f1234567890abcdef12345
         name:
           type: string
-          example: Suresh
+          example: Suresh Babu
         mobile:
           type: string
           example: "9962577674"
@@ -264,85 +747,26 @@ components:
           example: suresh@example.com
         role:
           $ref: "#/components/schemas/UserRole"
+        accountStatus:
+          $ref: "#/components/schemas/UserAccountStatus"
         profile:
-          type: object
-          properties:
-            firstName:
-              type: string
-              example: Suresh
-            lastName:
-              type: string
-              example: Kumar
-            email:
-              type: string
-              format: email
-              example: suresh@example.com
-            phone:
-              type: object
-              properties:
-                countryCode:
-                  type: string
-                  example: "+91"
-                number:
-                  type: string
-                  example: "9962577674"
-            address:
-              type: object
-              properties:
-                addressLine1:
-                  type: string
-                  example: Anna Nagar
-                district:
-                  type: string
-                  example: Chennai
-                city:
-                  type: string
-                  example: Chennai
-                state:
-                  type: string
-                  example: Tamil Nadu
-                pincode:
-                  type: string
-                  example: "600040"
-                country:
-                  type: string
-                  example: India
-            professionalDetails:
-              type: object
-              properties:
-                companyName:
-                  type: string
-                  example: ArchidTech
-                siteName:
-                  type: string
-                  example: Chennai Office
-            isVerified:
-              type: boolean
-              example: false
-            verifiedBy:
-              type: string
-              nullable: true
-              example: null
-            verifiedAt:
-              type: string
-              nullable: true
-              example: null
+          $ref: "#/components/schemas/UserProfile"
         company:
           type: string
           nullable: true
           example: null
-        isActive:
-          type: boolean
-          example: true
         lastLoginAt:
           type: string
+          format: date-time
           nullable: true
           example: "2026-05-10T10:00:00.000Z"
         createdAt:
           type: string
+          format: date-time
           example: "2026-05-10T10:00:00.000Z"
         updatedAt:
           type: string
+          format: date-time
           example: "2026-05-10T10:00:00.000Z"
 
     AuthUserResponse:
@@ -377,6 +801,102 @@ components:
               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
             user:
               $ref: "#/components/schemas/User"
+
+    ProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Profile fetched successfully
+        data:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+
+    UserListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Users fetched successfully
+        data:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 100
+            totalPages:
+              type: integer
+              example: 5
+            users:
+              type: array
+              items:
+                $ref: "#/components/schemas/User"
+
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Suresh Babu
+        firstName:
+          type: string
+          example: Suresh
+        lastName:
+          type: string
+          example: Babu
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        mobile:
+          type: string
+          example: "9962577674"
+        phone:
+          $ref: "#/components/schemas/ProfilePhone"
+        address:
+          $ref: "#/components/schemas/ProfileAddress"
+        professionalDetails:
+          $ref: "#/components/schemas/ProfessionalDetails"
+        avatarUrl:
+          type: string
+          example: ""
+
+    VerifyUserRequest:
+      type: object
+      properties:
+        isVerified:
+          type: boolean
+          example: true
+
+    UpdateUserRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          $ref: "#/components/schemas/UserRole"
+
+    UpdateUserStatusRequest:
+      type: object
+      required:
+        - accountStatus
+      properties:
+        accountStatus:
+          $ref: "#/components/schemas/UserAccountStatus"
 
     ValidationErrorItem:
       type: object
