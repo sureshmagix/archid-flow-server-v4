@@ -1,0 +1,337 @@
+{
+  "info": {
+    "name": "Archid Flow Server v4 - Phase 05 - Device Types",
+    "_postman_id": "phase05-device-types-archid-flow-v4",
+    "description": "Postman collection for testing Phase 05 Device Types module.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.archidtech.in",
+      "type": "string"
+    },
+    {
+      "key": "apiVersion",
+      "value": "api/v1",
+      "type": "string"
+    },
+    {
+      "key": "superAdminEmail",
+      "value": "superadmin@archidtech.in",
+      "type": "string"
+    },
+    {
+      "key": "superAdminPassword",
+      "value": "ChangeMe@123",
+      "type": "string"
+    },
+    {
+      "key": "superAdminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deviceTypeId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth - Login Super Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login success', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const token =",
+              "  json?.data?.accessToken ||",
+              "  json?.data?.token ||",
+              "  json?.accessToken ||",
+              "  json?.token;",
+              "",
+              "if (token) {",
+              "  pm.collectionVariables.set('superAdminToken', token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Device Types - Create Basic Light",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Basic Light\",\n  \"description\": \"Single channel ON/OFF light device\",\n  \"category\": \"light\",\n  \"manufacturer\": \"ArchidTech\",\n  \"model\": \"ATL-BASIC-LIGHT-01\",\n  \"protocols\": [\"mqtt\", \"wifi\"],\n  \"capabilities\": [\n    {\n      \"key\": \"power\",\n      \"label\": \"Power\",\n      \"dataType\": \"boolean\",\n      \"defaultValue\": false,\n      \"readOnly\": false\n    },\n    {\n      \"key\": \"state\",\n      \"label\": \"Current State\",\n      \"dataType\": \"enum\",\n      \"enumValues\": [\"on\", \"off\"],\n      \"defaultValue\": \"off\",\n      \"readOnly\": false\n    }\n  ],\n  \"commandSchema\": [\n    {\n      \"command\": \"set_power\",\n      \"label\": \"Set Power\",\n      \"description\": \"Turn light ON or OFF\",\n      \"payloadSchema\": {\n        \"power\": \"boolean\"\n      }\n    }\n  ],\n  \"telemetrySchema\": [\n    {\n      \"key\": \"rssi\",\n      \"label\": \"WiFi RSSI\",\n      \"dataType\": \"number\",\n      \"unit\": \"dBm\"\n    }\n  ],\n  \"metadata\": {\n    \"uiIcon\": \"lightbulb\",\n    \"mqttTopicTemplate\": \"archid/light/{deviceId}\"\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Device type created', function () {",
+              "  pm.expect([200, 201, 409]).to.include(pm.response.code);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const deviceType = json?.data?.deviceType || json?.deviceType || json?.data;",
+              "",
+              "if (deviceType?._id || deviceType?.id) {",
+              "  pm.collectionVariables.set('deviceTypeId', deviceType._id || deviceType.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Device Types - List All",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types?page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "04 - Device Types - Search Light",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types?search=light&category=light&isActive=true&page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "light"
+            },
+            {
+              "key": "category",
+              "value": "light"
+            },
+            {
+              "key": "isActive",
+              "value": "true"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "05 - Device Types - Get By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types/{{deviceTypeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types",
+            "{{deviceTypeId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "06 - Device Types - Update Basic Light",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types/{{deviceTypeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types",
+            "{{deviceTypeId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Updated single channel ON/OFF light device\",\n  \"metadata\": {\n    \"uiIcon\": \"lightbulb\",\n    \"mqttTopicTemplate\": \"archid/light/{deviceId}\",\n    \"phase\": \"05\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "07 - Device Types - Deactivate",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types/{{deviceTypeId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types",
+            "{{deviceTypeId}}",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": false\n}"
+        }
+      }
+    },
+    {
+      "name": "08 - Device Types - Activate",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{apiVersion}}/device-types/{{deviceTypeId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{apiVersion}}",
+            "device-types",
+            "{{deviceTypeId}}",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": true\n}"
+        }
+      }
+    }
+  ]
+}
