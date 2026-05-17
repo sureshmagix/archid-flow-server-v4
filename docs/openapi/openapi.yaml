@@ -1,39 +1,50 @@
 openapi: 3.0.3
 info:
-  title: Archid Flow Server V4 API
+  title: 'Archid Flow Server V4 API'
   version: 1.0.0
-  description: Professional REST API documentation for Archid Flow IoT backend. This backend supports React Native, React
-    Web, MongoDB, and MQTT-based IoT architecture.
+  description: "Professional REST API documentation for Archid Flow IoT backend. This backend supports React Native, React\nWeb, MongoDB, and MQTT-based IoT architecture."
 servers:
-- url: https://api.archidtech.in
-  description: Utho cloud / production API server
-- url: http://localhost:4000
-  description: Local development server
+  -
+    url: 'https://api.archidtech.in'
+    description: 'Utho cloud / production API server'
+  -
+    url: 'http://localhost:4000'
+    description: 'Local development server'
 tags:
-- name: Health
-  description: Server health and status APIs
-- name: Auth
-  description: Authentication APIs for signup, login, and current user
-- name: Profile
-  description: Logged-in user profile APIs
-- name: Users
-  description: Super admin user management APIs
-- name: Companies
-  description: Company/customer organization management APIs
-- name: Sites
-  description: Customer site/location management APIs
-- name: Device Types
-  description: Device type template management APIs
+  -
+    name: Health
+    description: 'Server health and status APIs'
+  -
+    name: Auth
+    description: 'Authentication APIs for signup, login, and current user'
+  -
+    name: Profile
+    description: 'Logged-in user profile APIs'
+  -
+    name: Users
+    description: 'Super admin user management APIs'
+  -
+    name: Companies
+    description: 'Company/customer organization management APIs'
+  -
+    name: Sites
+    description: 'Customer site/location management APIs'
+  -
+    name: 'Device Types'
+    description: 'Device type template management APIs'
+  -
+    name: Devices
+    description: 'Customer IoT device inventory and live-state APIs'
 paths:
   /health:
     get:
       tags:
-      - Health
-      summary: Check server health
-      description: Returns server status, environment, API version, and timestamp.
+        - Health
+      summary: 'Check server health'
+      description: 'Returns server status, environment, API version, and timestamp.'
       responses:
         '200':
-          description: Server is healthy
+          description: 'Server is healthy'
           content:
             application/json:
               schema:
@@ -41,10 +52,9 @@ paths:
   /api/v1/auth/signup:
     post:
       tags:
-      - Auth
-      summary: Register a new customer admin
-      description: Creates a new customer admin account. In Archid Flow V4, the default signup user is a customer admin, meaning
-        the user can purchase, claim, own, manage, and share IoT devices.
+        - Auth
+      summary: 'Register a new customer admin'
+      description: "Creates a new customer admin account. In Archid Flow V4, the default signup user is a customer admin, meaning\nthe user can purchase, claim, own, manage, and share IoT devices."
       requestBody:
         required: true
         content:
@@ -59,19 +69,19 @@ paths:
               confirmPassword: '123456'
       responses:
         '201':
-          description: User registered successfully
+          description: 'User registered successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthUserResponse'
         '400':
-          description: Validation failed
+          description: 'Validation failed'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: User already exists with this mobile number or email
+          description: 'User already exists with this mobile number or email'
           content:
             application/json:
               schema:
@@ -79,9 +89,9 @@ paths:
   /api/v1/auth/login:
     post:
       tags:
-      - Auth
-      summary: Login user
-      description: Login using email or mobile number and password.
+        - Auth
+      summary: 'Login user'
+      description: 'Login using email or mobile number and password.'
       requestBody:
         required: true
         content:
@@ -90,36 +100,36 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
             examples:
               loginWithEmail:
-                summary: Login using email
+                summary: 'Login using email'
                 value:
                   identifier: suresh@example.com
                   password: '123456'
               loginWithMobile:
-                summary: Login using mobile number
+                summary: 'Login using mobile number'
                 value:
                   identifier: '9962577674'
                   password: '123456'
       responses:
         '200':
-          description: Login successful
+          description: 'Login successful'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '400':
-          description: Validation failed
+          description: 'Validation failed'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Invalid credentials
+          description: 'Invalid credentials'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: User account is inactive or blocked
+          description: 'User account is inactive or blocked'
           content:
             application/json:
               schema:
@@ -127,26 +137,27 @@ paths:
   /api/v1/auth/me:
     get:
       tags:
-      - Auth
-      summary: Get current logged-in user
-      description: Returns the current user based on the JWT Bearer token.
+        - Auth
+      summary: 'Get current logged-in user'
+      description: 'Returns the current user based on the JWT Bearer token.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       responses:
         '200':
-          description: Current user fetched successfully
+          description: 'Current user fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthUserResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: User account is inactive or blocked
+          description: 'User account is inactive or blocked'
           content:
             application/json:
               schema:
@@ -154,38 +165,39 @@ paths:
   /api/v1/profile:
     get:
       tags:
-      - Profile
-      summary: Get logged-in user profile
-      description: Returns the profile of the currently logged-in user.
+        - Profile
+      summary: 'Get logged-in user profile'
+      description: 'Returns the profile of the currently logged-in user.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       responses:
         '200':
-          description: Profile fetched successfully
+          description: 'Profile fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - Profile
-      summary: Update logged-in user profile
-      description: Updates profile details for the currently logged-in user. Restricted fields like password, role, accountStatus,
-        isVerified, verifiedBy, and verifiedAt cannot be updated from this endpoint.
+        - Profile
+      summary: 'Update logged-in user profile'
+      description: "Updates profile details for the currently logged-in user. Restricted fields like password, role, accountStatus,\nisVerified, verifiedBy, and verifiedAt cannot be updated from this endpoint."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       requestBody:
         required: true
         content:
@@ -193,7 +205,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ProfileUpdateRequest'
             example:
-              name: Suresh Babu
+              name: 'Suresh Babu'
               firstName: Suresh
               lastName: Babu
               email: suresh@example.com
@@ -202,45 +214,45 @@ paths:
                 countryCode: '+91'
                 number: '9962577674'
               address:
-                addressLine1: Anna Nagar
-                addressLine2: ''
+                addressLine1: 'Anna Nagar'
+                addressLine2: ""
                 district: Chennai
                 city: Chennai
-                state: Tamil Nadu
+                state: 'Tamil Nadu'
                 pincode: '600040'
                 country: India
               professionalDetails:
                 companyName: ArchidTech
                 designation: Founder
                 department: IoT
-              avatarUrl: ''
+              avatarUrl: ""
       responses:
         '200':
-          description: Profile updated successfully
+          description: 'Profile updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '400':
-          description: Invalid profile update request
+          description: 'Invalid profile update request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Email or mobile number already exists
+          description: 'Email or mobile number already exists'
           content:
             application/json:
               schema:
@@ -248,132 +260,141 @@ paths:
   /api/v1/users:
     get:
       tags:
-      - Users
-      summary: List users
-      description: Lists platform users. This endpoint is currently restricted to super_admin users.
+        - Users
+      summary: 'List users'
+      description: 'Lists platform users. This endpoint is currently restricted to super_admin users.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: query
-        name: page
-        required: false
-        schema:
-          type: integer
-          example: 1
-        description: Page number
-      - in: query
-        name: limit
-        required: false
-        schema:
-          type: integer
-          example: 20
-        description: Number of users per page. Maximum allowed is 100.
-      - in: query
-        name: role
-        required: false
-        schema:
-          $ref: '#/components/schemas/UserRole'
-        description: Filter users by role
-      - in: query
-        name: accountStatus
-        required: false
-        schema:
-          $ref: '#/components/schemas/UserAccountStatus'
-        description: Filter users by account status
-      - in: query
-        name: q
-        required: false
-        schema:
-          type: string
-          example: suresh
-        description: Search by name, mobile, email, profile name, phone, or company name
+        -
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: 'Page number'
+        -
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: 'Number of users per page. Maximum allowed is 100.'
+        -
+          in: query
+          name: role
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserRole'
+          description: 'Filter users by role'
+        -
+          in: query
+          name: accountStatus
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserAccountStatus'
+          description: 'Filter users by account status'
+        -
+          in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: suresh
+          description: 'Search by name, mobile, email, profile name, phone, or company name'
       responses:
         '200':
-          description: Users fetched successfully
+          description: 'Users fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserListResponse'
         '400':
-          description: Invalid filter query
+          description: 'Invalid filter query'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can access this endpoint.
+          description: 'Forbidden. Only super_admin can access this endpoint.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/users/{userId}:
+  '/api/v1/users/{userId}':
     get:
       tags:
-      - Users
-      summary: Get user by ID
-      description: Fetches one user by MongoDB ObjectId. This endpoint is restricted to super_admin users.
+        - Users
+      summary: 'Get user by ID'
+      description: 'Fetches one user by MongoDB ObjectId. This endpoint is restricted to super_admin users.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: userId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       responses:
         '200':
-          description: User fetched successfully
+          description: 'User fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '400':
-          description: Invalid user ID
+          description: 'Invalid user ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can access this endpoint.
+          description: 'Forbidden. Only super_admin can access this endpoint.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/users/{userId}/verify:
+  '/api/v1/users/{userId}/verify':
     patch:
       tags:
-      - Users
-      summary: Verify or unverify user
-      description: Verifies or removes verification for a user profile. If isVerified is not sent, the system treats it as
-        true. This endpoint is restricted to super_admin users.
+        - Users
+      summary: 'Verify or unverify user'
+      description: "Verifies or removes verification for a user profile. If isVerified is not sent, the system treats it as\ntrue. This endpoint is restricted to super_admin users."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: userId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: false
         content:
@@ -384,51 +405,52 @@ paths:
               isVerified: true
       responses:
         '200':
-          description: User verification updated successfully
+          description: 'User verification updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '400':
-          description: Invalid user ID
+          description: 'Invalid user ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can access this endpoint.
+          description: 'Forbidden. Only super_admin can access this endpoint.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/users/{userId}/role:
+  '/api/v1/users/{userId}/role':
     patch:
       tags:
-      - Users
-      summary: Update user role
-      description: Updates a user's role. This endpoint is restricted to super_admin users. A super_admin cannot change their
-        own role from this endpoint. The system also protects against removing the last remaining super_admin.
+        - Users
+      summary: 'Update user role'
+      description: "Updates a user's role. This endpoint is restricted to super_admin users. A super_admin cannot change their\nown role from this endpoint. The system also protects against removing the last remaining super_admin."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: userId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: true
         content:
@@ -439,52 +461,52 @@ paths:
               role: customer_control_user
       responses:
         '200':
-          description: User role updated successfully
+          description: 'User role updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '400':
-          description: Invalid role, invalid user ID, or protected action
+          description: 'Invalid role, invalid user ID, or protected action'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can access this endpoint.
+          description: 'Forbidden. Only super_admin can access this endpoint.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/users/{userId}/status:
+  '/api/v1/users/{userId}/status':
     patch:
       tags:
-      - Users
-      summary: Update user account status
-      description: Updates a user's account status. This endpoint is restricted to super_admin users. A super_admin cannot
-        change their own status from this endpoint. The system also protects against disabling or blocking the last remaining
-        super_admin.
+        - Users
+      summary: 'Update user account status'
+      description: "Updates a user's account status. This endpoint is restricted to super_admin users. A super_admin cannot\nchange their own status from this endpoint. The system also protects against disabling or blocking the last remaining\nsuper_admin."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: userId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: true
         content:
@@ -495,31 +517,31 @@ paths:
               accountStatus: active
       responses:
         '200':
-          description: User status updated successfully
+          description: 'User status updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileResponse'
         '400':
-          description: Invalid account status, invalid user ID, or protected action
+          description: 'Invalid account status, invalid user ID, or protected action'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can access this endpoint.
+          description: 'Forbidden. Only super_admin can access this endpoint.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found
+          description: 'User not found'
           content:
             application/json:
               schema:
@@ -527,12 +549,12 @@ paths:
   /api/v1/companies:
     post:
       tags:
-      - Companies
-      summary: Create company
-      description: Creates a customer company. This endpoint is restricted to super_admin. Company code is unique and stored
-        in uppercase.
+        - Companies
+      summary: 'Create company'
+      description: "Creates a customer company. This endpoint is restricted to super_admin. Company code is unique and stored\nin uppercase."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       requestBody:
         required: true
         content:
@@ -540,103 +562,108 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateCompanyRequest'
             example:
-              name: Archid Demo Customer Pvt Ltd
+              name: 'Archid Demo Customer Pvt Ltd'
               code: ARCHID-DEMO
               email: admin@archiddemo.com
               phone:
                 countryCode: '+91'
                 number: '9876543210'
               address:
-                addressLine1: Demo Tech Park
-                addressLine2: ''
+                addressLine1: 'Demo Tech Park'
+                addressLine2: ""
                 district: Chennai
                 city: Chennai
-                state: Tamil Nadu
+                state: 'Tamil Nadu'
                 pincode: '600040'
                 country: India
               status: active
-              notes: Demo company created during Phase 04 testing
+              notes: 'Demo company created during Phase 04 testing'
       responses:
         '201':
-          description: Company created successfully
+          description: 'Company created successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CompanyResponse'
         '400':
-          description: Validation failed
+          description: 'Validation failed'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can create company.
+          description: 'Forbidden. Only super_admin can create company.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Company code already exists
+          description: 'Company code already exists'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
-      - Companies
-      summary: List companies
-      description: Lists companies. super_admin can view all companies. Customer users can view only their assigned company.
+        - Companies
+      summary: 'List companies'
+      description: 'Lists companies. super_admin can view all companies. Customer users can view only their assigned company.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: query
-        name: page
-        required: false
-        schema:
-          type: integer
-          example: 1
-        description: Page number
-      - in: query
-        name: limit
-        required: false
-        schema:
-          type: integer
-          example: 20
-        description: Number of companies per page. Maximum allowed is 100.
-      - in: query
-        name: status
-        required: false
-        schema:
-          $ref: '#/components/schemas/CompanyStatus'
-        description: Filter companies by status
-      - in: query
-        name: q
-        required: false
-        schema:
-          type: string
-          example: demo
-        description: Search by company name, code, email, phone, city, or state
+        -
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: 'Page number'
+        -
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: 'Number of companies per page. Maximum allowed is 100.'
+        -
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/CompanyStatus'
+          description: 'Filter companies by status'
+        -
+          in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: demo
+          description: 'Search by company name, code, email, phone, city, or state'
       responses:
         '200':
-          description: Companies fetched successfully
+          description: 'Companies fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CompanyListResponse'
         '400':
-          description: Invalid filter query
+          description: 'Invalid filter query'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
@@ -647,67 +674,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/companies/{companyId}:
+  '/api/v1/companies/{companyId}':
     get:
       tags:
-      - Companies
-      summary: Get company by ID
-      description: Fetches one company by MongoDB ObjectId. super_admin can access any company. Customer users can access
-        only their assigned company.
+        - Companies
+      summary: 'Get company by ID'
+      description: "Fetches one company by MongoDB ObjectId. super_admin can access any company. Customer users can access\nonly their assigned company."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: companyId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       responses:
         '200':
-          description: Company fetched successfully
+          description: 'Company fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CompanyResponse'
         '400':
-          description: Invalid company ID
+          description: 'Invalid company ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. User cannot access this company.
+          description: 'Forbidden. User cannot access this company.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Company not found
+          description: 'Company not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - Companies
-      summary: Update company
-      description: Updates company details. This endpoint is restricted to super_admin.
+        - Companies
+      summary: 'Update company'
+      description: 'Updates company details. This endpoint is restricted to super_admin.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: companyId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: true
         content:
@@ -715,62 +745,63 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateCompanyRequest'
             example:
-              name: Archid Demo Customer Pvt Ltd
+              name: 'Archid Demo Customer Pvt Ltd'
               status: active
-              notes: Updated from Phase 04 API testing
+              notes: 'Updated from Phase 04 API testing'
       responses:
         '200':
-          description: Company updated successfully
+          description: 'Company updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CompanyResponse'
         '400':
-          description: Validation failed or invalid company ID
+          description: 'Validation failed or invalid company ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can update company.
+          description: 'Forbidden. Only super_admin can update company.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Company not found
+          description: 'Company not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Company code already exists
+          description: 'Company code already exists'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/companies/{companyId}/assign-user:
+  '/api/v1/companies/{companyId}/assign-user':
     patch:
       tags:
-      - Companies
-      summary: Assign user to company
-      description: Assigns an existing non-super-admin user to a company. Optional role can be sent to set the customer's
-        role. This endpoint is restricted to super_admin.
+        - Companies
+      summary: 'Assign user to company'
+      description: "Assigns an existing non-super-admin user to a company. Optional role can be sent to set the customer's\nrole. This endpoint is restricted to super_admin."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: companyId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: true
         content:
@@ -782,31 +813,31 @@ paths:
               role: customer_admin
       responses:
         '200':
-          description: User assigned to company successfully
+          description: 'User assigned to company successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthUserResponse'
         '400':
-          description: Invalid user ID, invalid company ID, or protected role assignment
+          description: 'Invalid user ID, invalid company ID, or protected role assignment'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can assign users to company.
+          description: 'Forbidden. Only super_admin can assign users to company.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Company or user not found
+          description: 'Company or user not found'
           content:
             application/json:
               schema:
@@ -814,12 +845,12 @@ paths:
   /api/v1/sites:
     post:
       tags:
-      - Sites
-      summary: Create site
-      description: Creates a site under a company. super_admin must send company ID. customer_admin can create a site only
-        under their assigned company.
+        - Sites
+      summary: 'Create site'
+      description: "Creates a site under a company. super_admin must send company ID. customer_admin can create a site only\nunder their assigned company."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       requestBody:
         required: true
         content:
@@ -828,19 +859,19 @@ paths:
               $ref: '#/components/schemas/CreateSiteRequest'
             example:
               company: 65f1234567890abcdef12345
-              name: Chennai Main Site
+              name: 'Chennai Main Site'
               code: CHN-MAIN
               siteType: office
               contactPerson:
-                name: Site Manager
+                name: 'Site Manager'
                 email: site@archiddemo.com
                 phone: '9876543210'
               address:
-                addressLine1: Demo Site Address
-                addressLine2: ''
+                addressLine1: 'Demo Site Address'
+                addressLine2: ""
                 district: Chennai
                 city: Chennai
-                state: Tamil Nadu
+                state: 'Tamil Nadu'
                 pincode: '600040'
                 country: India
               location:
@@ -848,102 +879,107 @@ paths:
                 longitude: 80.2707
               timezone: Asia/Kolkata
               status: active
-              notes: Demo site created during Phase 04 testing
+              notes: 'Demo site created during Phase 04 testing'
       responses:
         '201':
-          description: Site created successfully
+          description: 'Site created successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiteResponse'
         '400':
-          description: Validation failed or company is required
+          description: 'Validation failed or company is required'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin or customer_admin can create sites.
+          description: 'Forbidden. Only super_admin or customer_admin can create sites.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Company not found
+          description: 'Company not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Site code already exists for this company
+          description: 'Site code already exists for this company'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
-      - Sites
-      summary: List sites
-      description: Lists sites. super_admin can list all sites or filter by company. Customer users can list only sites under
-        their assigned company.
+        - Sites
+      summary: 'List sites'
+      description: "Lists sites. super_admin can list all sites or filter by company. Customer users can list only sites under\ntheir assigned company."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: query
-        name: page
-        required: false
-        schema:
-          type: integer
-          example: 1
-        description: Page number
-      - in: query
-        name: limit
-        required: false
-        schema:
-          type: integer
-          example: 20
-        description: Number of sites per page. Maximum allowed is 100.
-      - in: query
-        name: company
-        required: false
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
-        description: Filter sites by company ID. Mainly for super_admin.
-      - in: query
-        name: status
-        required: false
-        schema:
-          $ref: '#/components/schemas/SiteStatus'
-        description: Filter sites by status
-      - in: query
-        name: q
-        required: false
-        schema:
-          type: string
-          example: chennai
-        description: Search by site name, code, type, contact person, city, or state
+        -
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: 'Page number'
+        -
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: 'Number of sites per page. Maximum allowed is 100.'
+        -
+          in: query
+          name: company
+          required: false
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+          description: 'Filter sites by company ID. Mainly for super_admin.'
+        -
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/SiteStatus'
+          description: 'Filter sites by status'
+        -
+          in: query
+          name: q
+          required: false
+          schema:
+            type: string
+            example: chennai
+          description: 'Search by site name, code, type, contact person, city, or state'
       responses:
         '200':
-          description: Sites fetched successfully
+          description: 'Sites fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiteListResponse'
         '400':
-          description: Invalid filter query
+          description: 'Invalid filter query'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
@@ -954,68 +990,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/sites/{siteId}:
+  '/api/v1/sites/{siteId}':
     get:
       tags:
-      - Sites
-      summary: Get site by ID
-      description: Fetches one site by MongoDB ObjectId. super_admin can access any site. Customer users can access only sites
-        under their assigned company.
+        - Sites
+      summary: 'Get site by ID'
+      description: "Fetches one site by MongoDB ObjectId. super_admin can access any site. Customer users can access only sites\nunder their assigned company."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: siteId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: siteId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       responses:
         '200':
-          description: Site fetched successfully
+          description: 'Site fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiteResponse'
         '400':
-          description: Invalid site ID
+          description: 'Invalid site ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. User cannot access this site.
+          description: 'Forbidden. User cannot access this site.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Site not found
+          description: 'Site not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - Sites
-      summary: Update site
-      description: Updates site details. super_admin can update any site. customer_admin can update only sites under their
-        assigned company.
+        - Sites
+      summary: 'Update site'
+      description: "Updates site details. super_admin can update any site. customer_admin can update only sites under their\nassigned company."
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: siteId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
+        -
+          in: path
+          name: siteId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
       requestBody:
         required: true
         content:
@@ -1023,42 +1061,42 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateSiteRequest'
             example:
-              name: Chennai Main Site
+              name: 'Chennai Main Site'
               status: active
-              notes: Updated from Phase 04 API testing
+              notes: 'Updated from Phase 04 API testing'
       responses:
         '200':
-          description: Site updated successfully
+          description: 'Site updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiteResponse'
         '400':
-          description: Validation failed or invalid site ID
+          description: 'Validation failed or invalid site ID'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. User cannot update this site.
+          description: 'Forbidden. User cannot update this site.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Site or company not found
+          description: 'Site or company not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Site code already exists for this company
+          description: 'Site code already exists for this company'
           content:
             application/json:
               schema:
@@ -1066,11 +1104,12 @@ paths:
   /api/v1/device-types:
     post:
       tags:
-      - Device Types
-      summary: Create device type
-      description: Creates a reusable IoT device type template. This endpoint is restricted to super_admin users.
+        - 'Device Types'
+      summary: 'Create device type'
+      description: 'Creates a reusable IoT device type template. This endpoint is restricted to super_admin users.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       requestBody:
         required: true
         content:
@@ -1078,190 +1117,204 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateDeviceTypeRequest'
             example:
-              name: Basic Light
-              description: Single channel ON/OFF light device
+              name: 'Basic Light'
+              description: 'Single channel ON/OFF light device'
               category: light
               manufacturer: ArchidTech
               model: ATL-BASIC-LIGHT-01
               protocols:
-              - mqtt
-              - wifi
+                - mqtt
+                - wifi
               capabilities:
-              - key: power
-                label: Power
-                dataType: boolean
-                defaultValue: false
-                readOnly: false
-              - key: state
-                label: Current State
-                dataType: enum
-                enumValues:
-                - 'on'
-                - 'off'
-                defaultValue: 'off'
-                readOnly: false
+                -
+                  key: power
+                  label: Power
+                  dataType: boolean
+                  defaultValue: false
+                  readOnly: false
+                -
+                  key: state
+                  label: 'Current State'
+                  dataType: enum
+                  enumValues:
+                    - on
+                    - off
+                  defaultValue: off
+                  readOnly: false
               commandSchema:
-              - command: set_power
-                label: Set Power
-                description: Turn light ON or OFF
-                payloadSchema:
-                  power: boolean
+                -
+                  command: set_power
+                  label: 'Set Power'
+                  description: 'Turn light ON or OFF'
+                  payloadSchema:
+                    power: boolean
               telemetrySchema:
-              - key: rssi
-                label: WiFi RSSI
-                dataType: number
-                unit: dBm
+                -
+                  key: rssi
+                  label: 'WiFi RSSI'
+                  dataType: number
+                  unit: dBm
               metadata:
                 uiIcon: lightbulb
-                mqttTopicTemplate: archid/light/{deviceId}
+                mqttTopicTemplate: 'archid/light/{deviceId}'
       responses:
         '201':
-          description: Device type created successfully
+          description: 'Device type created successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceTypeResponse'
         '400':
-          description: Validation failed or invalid request
+          description: 'Validation failed or invalid request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can create device types.
+          description: 'Forbidden. Only super_admin can create device types.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Device type already exists
+          description: 'Device type already exists'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
-      - Device Types
-      summary: List device types
-      description: Lists device type templates. Any authenticated user can read device types.
+        - 'Device Types'
+      summary: 'List device types'
+      description: 'Lists device type templates. Any authenticated user can read device types.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: query
-        name: search
-        required: false
-        schema:
-          type: string
-          example: light
-        description: Search by name, slug, description, manufacturer, or model
-      - in: query
-        name: category
-        required: false
-        schema:
-          $ref: '#/components/schemas/DeviceTypeCategory'
-        description: Filter by device type category
-      - in: query
-        name: isActive
-        required: false
-        schema:
-          type: boolean
-          example: true
-        description: Filter by active/inactive status
-      - in: query
-        name: page
-        required: false
-        schema:
-          type: integer
-          example: 1
-        description: Page number
-      - in: query
-        name: limit
-        required: false
-        schema:
-          type: integer
-          example: 20
-        description: Number of records per page. Maximum allowed is 100.
+        -
+          in: query
+          name: search
+          required: false
+          schema:
+            type: string
+            example: light
+          description: 'Search by name, slug, description, manufacturer, or model'
+        -
+          in: query
+          name: category
+          required: false
+          schema:
+            $ref: '#/components/schemas/DeviceTypeCategory'
+          description: 'Filter by device type category'
+        -
+          in: query
+          name: isActive
+          required: false
+          schema:
+            type: boolean
+            example: true
+          description: 'Filter by active/inactive status'
+        -
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: 'Page number'
+        -
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 20
+          description: 'Number of records per page. Maximum allowed is 100.'
       responses:
         '200':
-          description: Device types fetched successfully
+          description: 'Device types fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceTypeListResponse'
         '400':
-          description: Validation failed or invalid request
+          description: 'Validation failed or invalid request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/device-types/{deviceTypeId}:
+  '/api/v1/device-types/{deviceTypeId}':
     get:
       tags:
-      - Device Types
-      summary: Get device type by ID
-      description: Fetches one device type template by MongoDB ObjectId. Any authenticated user can read device types.
+        - 'Device Types'
+      summary: 'Get device type by ID'
+      description: 'Fetches one device type template by MongoDB ObjectId. Any authenticated user can read device types.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: deviceTypeId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
-        description: Device type MongoDB ObjectId
+        -
+          in: path
+          name: deviceTypeId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+          description: 'Device type MongoDB ObjectId'
       responses:
         '200':
-          description: Device type fetched successfully
+          description: 'Device type fetched successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceTypeResponse'
         '400':
-          description: Validation failed or invalid request
+          description: 'Validation failed or invalid request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Device type not found
+          description: 'Device type not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - Device Types
-      summary: Update device type
-      description: Updates a device type template. This endpoint is restricted to super_admin users.
+        - 'Device Types'
+      summary: 'Update device type'
+      description: 'Updates a device type template. This endpoint is restricted to super_admin users.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: deviceTypeId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
-        description: Device type MongoDB ObjectId
+        -
+          in: path
+          name: deviceTypeId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+          description: 'Device type MongoDB ObjectId'
       requestBody:
         required: true
         content:
@@ -1269,64 +1322,66 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateDeviceTypeRequest'
             example:
-              description: Updated single channel ON/OFF light device
+              description: 'Updated single channel ON/OFF light device'
               metadata:
                 uiIcon: lightbulb
-                mqttTopicTemplate: archid/light/{deviceId}
+                mqttTopicTemplate: 'archid/light/{deviceId}'
                 phase: '05'
       responses:
         '200':
-          description: Device type updated successfully
+          description: 'Device type updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceTypeResponse'
         '400':
-          description: Validation failed or invalid request
+          description: 'Validation failed or invalid request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can update device types.
+          description: 'Forbidden. Only super_admin can update device types.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Device type not found
+          description: 'Device type not found'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Device type already exists
+          description: 'Device type already exists'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /api/v1/device-types/{deviceTypeId}/status:
+  '/api/v1/device-types/{deviceTypeId}/status':
     patch:
       tags:
-      - Device Types
-      summary: Activate or deactivate device type
-      description: Updates the active/inactive status of a device type. This endpoint is restricted to super_admin users.
+        - 'Device Types'
+      summary: 'Activate or deactivate device type'
+      description: 'Updates the active/inactive status of a device type. This endpoint is restricted to super_admin users.'
       security:
-      - bearerAuth: []
+        -
+          bearerAuth: []
       parameters:
-      - in: path
-        name: deviceTypeId
-        required: true
-        schema:
-          type: string
-          example: 65f1234567890abcdef12345
-        description: Device type MongoDB ObjectId
+        -
+          in: path
+          name: deviceTypeId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+          description: 'Device type MongoDB ObjectId'
       requestBody:
         required: true
         content:
@@ -1337,31 +1392,420 @@ paths:
               isActive: false
       responses:
         '200':
-          description: Device type status updated successfully
+          description: 'Device type status updated successfully'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceTypeResponse'
         '400':
-          description: Validation failed or invalid request
+          description: 'Validation failed or invalid request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized or invalid token
+          description: 'Unauthorized or invalid token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden. Only super_admin can activate or deactivate device types.
+          description: 'Forbidden. Only super_admin can activate or deactivate device types.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Device type not found
+          description: 'Device type not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/devices:
+    post:
+      tags:
+        - Devices
+      summary: 'Create device'
+      description: 'Creates a device under a company and optional site. super_admin must send company ID. customer_admin can create only under their assigned company.'
+      security:
+        -
+          bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeviceRequest'
+            example:
+              company: 65f1234567890abcdef12345
+              site: 65f1234567890abcdef12345
+              deviceType: 65f1234567890abcdef12345
+              name: 'Demo Basic Light 01'
+              deviceCode: LIGHT-001
+              hardwareId: ATL-LIGHT-0001
+              serialNumber: SN-LIGHT-0001
+              macAddress: 'AA:BB:CC:DD:EE:01'
+              firmwareVersion: 1.0.0
+              provisioningStatus: unclaimed
+              operationalStatus: active
+              connectionStatus: offline
+              liveState:
+                power: false
+              metadata:
+                locationLabel: Reception
+              notes: 'Created during Phase 06 testing'
+      responses:
+        '201':
+          description: 'Device created successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: 'Validation failed or invalid relation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Company, site, owner, or device type not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 'Duplicate hardwareId or company deviceCode'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Devices
+      summary: 'List devices'
+      description: 'Lists devices. super_admin can list all devices or filter by company. Customer users can list only devices under their assigned company.'
+      security:
+        -
+          bearerAuth: []
+      parameters:
+        -
+          in: query
+          name: page
+          schema:
+            type: integer
+            example: 1
+        -
+          in: query
+          name: limit
+          schema:
+            type: integer
+            example: 20
+        -
+          in: query
+          name: company
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+        -
+          in: query
+          name: site
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+        -
+          in: query
+          name: deviceType
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+        -
+          in: query
+          name: owner
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+        -
+          in: query
+          name: operationalStatus
+          schema:
+            $ref: '#/components/schemas/DeviceOperationalStatus'
+        -
+          in: query
+          name: connectionStatus
+          schema:
+            $ref: '#/components/schemas/DeviceConnectionStatus'
+        -
+          in: query
+          name: provisioningStatus
+          schema:
+            $ref: '#/components/schemas/DeviceProvisioningStatus'
+        -
+          in: query
+          name: q
+          schema:
+            type: string
+            example: LIGHT-001
+      responses:
+        '200':
+          description: 'Devices fetched successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceListResponse'
+        '400':
+          description: 'Invalid filter query'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/v1/devices/{deviceId}':
+    get:
+      tags:
+        - Devices
+      summary: 'Get device by ID'
+      description: 'Fetches one device by MongoDB ObjectId. super_admin can access any device. Customer users can access only devices under their assigned company.'
+      security:
+        -
+          bearerAuth: []
+      parameters:
+        -
+          in: path
+          name: deviceId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      responses:
+        '200':
+          description: 'Device fetched successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: 'Invalid device ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Device not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - Devices
+      summary: 'Update device'
+      description: 'Updates device details. super_admin can update any device. customer_admin can update only devices under their assigned company.'
+      security:
+        -
+          bearerAuth: []
+      parameters:
+        -
+          in: path
+          name: deviceId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceRequest'
+            example:
+              name: 'Demo Basic Light 01 Updated'
+              firmwareVersion: 1.0.1
+              metadata:
+                locationLabel: 'Reception Updated'
+              notes: 'Updated during Phase 06 testing'
+      responses:
+        '200':
+          description: 'Device updated successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: 'Validation failed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Device or relation not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 'Duplicate hardwareId or company deviceCode'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/v1/devices/{deviceId}/status':
+    patch:
+      tags:
+        - Devices
+      summary: 'Update device operational status'
+      description: 'Updates device operational status to active, inactive, or maintenance.'
+      security:
+        -
+          bearerAuth: []
+      parameters:
+        -
+          in: path
+          name: deviceId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceStatusRequest'
+            example:
+              operationalStatus: maintenance
+      responses:
+        '200':
+          description: 'Device status updated successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: 'Validation failed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Device not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/v1/devices/{deviceId}/live-state':
+    patch:
+      tags:
+        - Devices
+      summary: 'Update device live state'
+      description: 'Updates connection status, last seen timestamps, and live state. This is useful for Phase 06 manual testing and later MQTT ingestion.'
+      security:
+        -
+          bearerAuth: []
+      parameters:
+        -
+          in: path
+          name: deviceId
+          required: true
+          schema:
+            type: string
+            example: 65f1234567890abcdef12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceLiveStateRequest'
+            example:
+              connectionStatus: online
+              liveState:
+                power: true
+                rssi: -55
+      responses:
+        '200':
+          description: 'Device live state updated successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: 'Validation failed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Device not found'
           content:
             application/json:
               schema:
@@ -1372,7 +1816,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Enter JWT token as Bearer token.
+      description: 'Enter JWT token as Bearer token.'
   schemas:
     HealthResponse:
       type: object
@@ -1382,13 +1826,13 @@ components:
           example: true
         message:
           type: string
-          example: Server is healthy
+          example: 'Server is healthy'
         data:
           type: object
           properties:
             appName:
               type: string
-              example: Archid Flow Server V4
+              example: 'Archid Flow Server V4'
             appCode:
               type: string
               example: archid-flow
@@ -1404,11 +1848,11 @@ components:
     SignupRequest:
       type: object
       required:
-      - name
-      - mobile
-      - email
-      - password
-      - confirmPassword
+        - name
+        - mobile
+        - email
+        - password
+        - confirmPassword
       properties:
         name:
           type: string
@@ -1431,64 +1875,62 @@ components:
     LoginRequest:
       type: object
       required:
-      - identifier
-      - password
+        - identifier
+        - password
       properties:
         identifier:
           type: string
           example: suresh@example.com
-          description: Email or mobile number
+          description: 'Email or mobile number'
         password:
           type: string
           format: password
           example: '123456'
     UserRole:
       type: string
-      description: User role in the Archid Flow platform. super_admin is ArchidTech/platform admin. customer_admin is the
-        device owner or customer admin. customer_control_user can control assigned or shared devices. customer_view_user can
-        only view assigned or shared device status.
+      description: "User role in the Archid Flow platform. super_admin is ArchidTech/platform admin. customer_admin is the\ndevice owner or customer admin. customer_control_user can control assigned or shared devices. customer_view_user can\nonly view assigned or shared device status."
       enum:
-      - super_admin
-      - customer_admin
-      - customer_control_user
-      - customer_view_user
+        - super_admin
+        - customer_admin
+        - customer_control_user
+        - customer_view_user
       example: customer_admin
     UserAccountStatus:
       type: string
-      description: User account status.
+      description: 'User account status.'
       enum:
-      - active
-      - inactive
-      - blocked
+        - active
+        - inactive
+        - blocked
       example: active
     CompanyStatus:
       type: string
-      description: Company account status.
+      description: 'Company account status.'
       enum:
-      - active
-      - inactive
-      - blocked
+        - active
+        - inactive
+        - blocked
       example: active
     SiteStatus:
       type: string
-      description: Site status.
+      description: 'Site status.'
       enum:
-      - active
-      - inactive
+        - active
+        - inactive
       example: active
     SiteType:
       type: string
-      description: Type/category of customer site.
+      description: 'Type/category of customer site.'
       enum:
-      - office
-      - parking
-      - factory
-      - warehouse
-      - residential
-      - mall
-      - hospital
-      - hotel
-      - other
+        - office
+        - parking
+        - factory
+        - warehouse
+        - residential
+        - mall
+        - hospital
+        - hotel
+        - other
       example: office
     ProfilePhone:
       type: object
@@ -1504,10 +1946,10 @@ components:
       properties:
         addressLine1:
           type: string
-          example: Anna Nagar
+          example: 'Anna Nagar'
         addressLine2:
           type: string
-          example: ''
+          example: ""
         district:
           type: string
           example: Chennai
@@ -1516,7 +1958,7 @@ components:
           example: Chennai
         state:
           type: string
-          example: Tamil Nadu
+          example: 'Tamil Nadu'
         pincode:
           type: string
           example: '600040'
@@ -1556,7 +1998,7 @@ components:
           $ref: '#/components/schemas/ProfessionalDetails'
         avatarUrl:
           type: string
-          example: ''
+          example: ""
         isVerified:
           type: boolean
           example: false
@@ -1577,7 +2019,7 @@ components:
           example: 65f1234567890abcdef12345
         name:
           type: string
-          example: Suresh Babu
+          example: 'Suresh Babu'
         mobile:
           type: string
           example: '9962577674'
@@ -1616,7 +2058,7 @@ components:
           example: true
         message:
           type: string
-          example: User registered successfully
+          example: 'User registered successfully'
         data:
           type: object
           properties:
@@ -1630,7 +2072,7 @@ components:
           example: true
         message:
           type: string
-          example: Login successful
+          example: 'Login successful'
         data:
           type: object
           properties:
@@ -1647,7 +2089,7 @@ components:
           example: true
         message:
           type: string
-          example: Profile fetched successfully
+          example: 'Profile fetched successfully'
         data:
           type: object
           properties:
@@ -1661,7 +2103,7 @@ components:
           example: true
         message:
           type: string
-          example: Users fetched successfully
+          example: 'Users fetched successfully'
         data:
           type: object
           properties:
@@ -1686,7 +2128,7 @@ components:
       properties:
         name:
           type: string
-          example: Suresh Babu
+          example: 'Suresh Babu'
         firstName:
           type: string
           example: Suresh
@@ -1708,7 +2150,7 @@ components:
           $ref: '#/components/schemas/ProfessionalDetails'
         avatarUrl:
           type: string
-          example: ''
+          example: ""
     VerifyUserRequest:
       type: object
       properties:
@@ -1718,14 +2160,14 @@ components:
     UpdateUserRoleRequest:
       type: object
       required:
-      - role
+        - role
       properties:
         role:
           $ref: '#/components/schemas/UserRole'
     UpdateUserStatusRequest:
       type: object
       required:
-      - accountStatus
+        - accountStatus
       properties:
         accountStatus:
           $ref: '#/components/schemas/UserAccountStatus'
@@ -1743,10 +2185,10 @@ components:
       properties:
         addressLine1:
           type: string
-          example: Demo Tech Park
+          example: 'Demo Tech Park'
         addressLine2:
           type: string
-          example: ''
+          example: ""
         district:
           type: string
           example: Chennai
@@ -1755,7 +2197,7 @@ components:
           example: Chennai
         state:
           type: string
-          example: Tamil Nadu
+          example: 'Tamil Nadu'
         pincode:
           type: string
           example: '600040'
@@ -1770,7 +2212,7 @@ components:
           example: 65f1234567890abcdef12345
         name:
           type: string
-          example: Archid Demo Customer Pvt Ltd
+          example: 'Archid Demo Customer Pvt Ltd'
         code:
           type: string
           example: ARCHID-DEMO
@@ -1786,7 +2228,7 @@ components:
           $ref: '#/components/schemas/CompanyStatus'
         notes:
           type: string
-          example: Demo company
+          example: 'Demo company'
         createdBy:
           type: string
           nullable: true
@@ -1811,7 +2253,7 @@ components:
           example: 65f1234567890abcdef12345
         name:
           type: string
-          example: Archid Demo Customer Pvt Ltd
+          example: 'Archid Demo Customer Pvt Ltd'
         code:
           type: string
           example: ARCHID-DEMO
@@ -1820,14 +2262,14 @@ components:
     CreateCompanyRequest:
       type: object
       required:
-      - name
-      - code
+        - name
+        - code
       properties:
         name:
           type: string
           minLength: 2
           maxLength: 120
-          example: Archid Demo Customer Pvt Ltd
+          example: 'Archid Demo Customer Pvt Ltd'
         code:
           type: string
           minLength: 2
@@ -1845,7 +2287,7 @@ components:
           $ref: '#/components/schemas/CompanyStatus'
         notes:
           type: string
-          example: Demo company created during Phase 04 testing
+          example: 'Demo company created during Phase 04 testing'
     UpdateCompanyRequest:
       type: object
       properties:
@@ -1853,7 +2295,7 @@ components:
           type: string
           minLength: 2
           maxLength: 120
-          example: Archid Demo Customer Pvt Ltd
+          example: 'Archid Demo Customer Pvt Ltd'
         code:
           type: string
           minLength: 2
@@ -1871,11 +2313,11 @@ components:
           $ref: '#/components/schemas/CompanyStatus'
         notes:
           type: string
-          example: Updated company notes
+          example: 'Updated company notes'
     AssignUserToCompanyRequest:
       type: object
       required:
-      - userId
+        - userId
       properties:
         userId:
           type: string
@@ -1883,9 +2325,9 @@ components:
         role:
           type: string
           enum:
-          - customer_admin
-          - customer_control_user
-          - customer_view_user
+            - customer_admin
+            - customer_control_user
+            - customer_view_user
           example: customer_admin
     CompanyResponse:
       type: object
@@ -1895,7 +2337,7 @@ components:
           example: true
         message:
           type: string
-          example: Company fetched successfully
+          example: 'Company fetched successfully'
         data:
           type: object
           properties:
@@ -1909,7 +2351,7 @@ components:
           example: true
         message:
           type: string
-          example: Companies fetched successfully
+          example: 'Companies fetched successfully'
         data:
           type: object
           properties:
@@ -1934,7 +2376,7 @@ components:
       properties:
         name:
           type: string
-          example: Site Manager
+          example: 'Site Manager'
         email:
           type: string
           format: email
@@ -1947,10 +2389,10 @@ components:
       properties:
         addressLine1:
           type: string
-          example: Demo Site Address
+          example: 'Demo Site Address'
         addressLine2:
           type: string
-          example: ''
+          example: ""
         district:
           type: string
           example: Chennai
@@ -1959,7 +2401,7 @@ components:
           example: Chennai
         state:
           type: string
-          example: Tamil Nadu
+          example: 'Tamil Nadu'
         pincode:
           type: string
           example: '600040'
@@ -1985,12 +2427,14 @@ components:
           example: 65f1234567890abcdef12345
         company:
           oneOf:
-          - type: string
-            example: 65f1234567890abcdef12345
-          - $ref: '#/components/schemas/CompanySummary'
+            -
+              type: string
+              example: 65f1234567890abcdef12345
+            -
+              $ref: '#/components/schemas/CompanySummary'
         name:
           type: string
-          example: Chennai Main Site
+          example: 'Chennai Main Site'
         code:
           type: string
           example: CHN-MAIN
@@ -2009,7 +2453,7 @@ components:
           $ref: '#/components/schemas/SiteStatus'
         notes:
           type: string
-          example: Demo site
+          example: 'Demo site'
         createdBy:
           type: string
           nullable: true
@@ -2029,18 +2473,18 @@ components:
     CreateSiteRequest:
       type: object
       required:
-      - name
-      - code
+        - name
+        - code
       properties:
         company:
           type: string
-          description: Required for super_admin. For customer_admin, assigned company is used automatically.
+          description: 'Required for super_admin. For customer_admin, assigned company is used automatically.'
           example: 65f1234567890abcdef12345
         name:
           type: string
           minLength: 2
           maxLength: 120
-          example: Chennai Main Site
+          example: 'Chennai Main Site'
         code:
           type: string
           minLength: 2
@@ -2061,19 +2505,19 @@ components:
           $ref: '#/components/schemas/SiteStatus'
         notes:
           type: string
-          example: Demo site created during Phase 04 testing
+          example: 'Demo site created during Phase 04 testing'
     UpdateSiteRequest:
       type: object
       properties:
         company:
           type: string
-          description: Only super_admin can move a site to another company.
+          description: 'Only super_admin can move a site to another company.'
           example: 65f1234567890abcdef12345
         name:
           type: string
           minLength: 2
           maxLength: 120
-          example: Chennai Main Site
+          example: 'Chennai Main Site'
         code:
           type: string
           minLength: 2
@@ -2094,7 +2538,7 @@ components:
           $ref: '#/components/schemas/SiteStatus'
         notes:
           type: string
-          example: Updated site notes
+          example: 'Updated site notes'
     SiteResponse:
       type: object
       properties:
@@ -2103,7 +2547,7 @@ components:
           example: true
         message:
           type: string
-          example: Site fetched successfully
+          example: 'Site fetched successfully'
         data:
           type: object
           properties:
@@ -2117,7 +2561,7 @@ components:
           example: true
         message:
           type: string
-          example: Sites fetched successfully
+          example: 'Sites fetched successfully'
         data:
           type: object
           properties:
@@ -2145,7 +2589,7 @@ components:
           example: email
         message:
           type: string
-          example: Valid email is required
+          example: 'Valid email is required'
     ErrorResponse:
       type: object
       properties:
@@ -2154,51 +2598,51 @@ components:
           example: false
         message:
           type: string
-          example: Validation failed
+          example: 'Validation failed'
         errors:
           type: array
           items:
             $ref: '#/components/schemas/ValidationErrorItem'
     DeviceTypeCategory:
       type: string
-      description: Device type category.
+      description: 'Device type category.'
       enum:
-      - light
-      - relay
-      - sensor
-      - gateway
-      - controller
-      - meter
-      - camera
-      - access_control
-      - parking
-      - other
+        - light
+        - relay
+        - sensor
+        - gateway
+        - controller
+        - meter
+        - camera
+        - access_control
+        - parking
+        - other
       example: light
     DeviceTypeProtocol:
       type: string
-      description: Communication protocol supported by the device type.
+      description: 'Communication protocol supported by the device type.'
       enum:
-      - mqtt
-      - http
-      - modbus
-      - rs485
-      - rs232
-      - ble
-      - zigbee
-      - wifi
-      - ethernet
-      - lora
-      - other
+        - mqtt
+        - http
+        - modbus
+        - rs485
+        - rs232
+        - ble
+        - zigbee
+        - wifi
+        - ethernet
+        - lora
+        - other
       example: mqtt
     DeviceTypeFieldDataType:
       type: string
-      description: Data type used for capabilities and telemetry fields.
+      description: 'Data type used for capabilities and telemetry fields.'
       enum:
-      - boolean
-      - number
-      - string
-      - enum
-      - object
+        - boolean
+        - number
+        - string
+        - enum
+        - object
       example: boolean
     DeviceCapability:
       type: object
@@ -2228,8 +2672,8 @@ components:
           items:
             type: string
           example:
-          - 'on'
-          - 'off'
+            - on
+            - off
         defaultValue:
           nullable: true
           example: false
@@ -2244,11 +2688,11 @@ components:
           example: set_power
         label:
           type: string
-          example: Set Power
+          example: 'Set Power'
         description:
           type: string
           nullable: true
-          example: Turn device ON or OFF
+          example: 'Turn device ON or OFF'
         payloadSchema:
           type: object
           additionalProperties: true
@@ -2262,7 +2706,7 @@ components:
           example: rssi
         label:
           type: string
-          example: WiFi RSSI
+          example: 'WiFi RSSI'
         dataType:
           $ref: '#/components/schemas/DeviceTypeFieldDataType'
         unit:
@@ -2280,14 +2724,14 @@ components:
           example: 65f1234567890abcdef12345
         name:
           type: string
-          example: Basic Light
+          example: 'Basic Light'
         slug:
           type: string
           example: basic-light
         description:
           type: string
           nullable: true
-          example: Single channel ON/OFF light device
+          example: 'Single channel ON/OFF light device'
         category:
           $ref: '#/components/schemas/DeviceTypeCategory'
         manufacturer:
@@ -2303,8 +2747,8 @@ components:
           items:
             $ref: '#/components/schemas/DeviceTypeProtocol'
           example:
-          - mqtt
-          - wifi
+            - mqtt
+            - wifi
         capabilities:
           type: array
           items:
@@ -2322,7 +2766,7 @@ components:
           additionalProperties: true
           example:
             uiIcon: lightbulb
-            mqttTopicTemplate: archid/light/{deviceId}
+            mqttTopicTemplate: 'archid/light/{deviceId}'
         isActive:
           type: boolean
           example: true
@@ -2345,18 +2789,18 @@ components:
     CreateDeviceTypeRequest:
       type: object
       required:
-      - name
+        - name
       properties:
         name:
           type: string
           minLength: 2
           maxLength: 120
-          example: Basic Light
+          example: 'Basic Light'
         description:
           type: string
           nullable: true
           maxLength: 1000
-          example: Single channel ON/OFF light device
+          example: 'Single channel ON/OFF light device'
         category:
           $ref: '#/components/schemas/DeviceTypeCategory'
         manufacturer:
@@ -2372,8 +2816,8 @@ components:
           items:
             $ref: '#/components/schemas/DeviceTypeProtocol'
           example:
-          - mqtt
-          - wifi
+            - mqtt
+            - wifi
         capabilities:
           type: array
           items:
@@ -2401,12 +2845,12 @@ components:
           type: string
           minLength: 2
           maxLength: 120
-          example: Basic Light
+          example: 'Basic Light'
         description:
           type: string
           nullable: true
           maxLength: 1000
-          example: Updated single channel ON/OFF light device
+          example: 'Updated single channel ON/OFF light device'
         category:
           $ref: '#/components/schemas/DeviceTypeCategory'
         manufacturer:
@@ -2422,8 +2866,8 @@ components:
           items:
             $ref: '#/components/schemas/DeviceTypeProtocol'
           example:
-          - mqtt
-          - wifi
+            - mqtt
+            - wifi
         capabilities:
           type: array
           items:
@@ -2448,7 +2892,7 @@ components:
     UpdateDeviceTypeStatusRequest:
       type: object
       required:
-      - isActive
+        - isActive
       properties:
         isActive:
           type: boolean
@@ -2461,7 +2905,7 @@ components:
           example: true
         message:
           type: string
-          example: Device type fetched successfully
+          example: 'Device type fetched successfully'
         data:
           type: object
           properties:
@@ -2475,7 +2919,7 @@ components:
           example: true
         message:
           type: string
-          example: Device types fetched successfully
+          example: 'Device types fetched successfully'
         data:
           type: object
           properties:
@@ -2498,3 +2942,215 @@ components:
                 totalPages:
                   type: integer
                   example: 1
+    DeviceOperationalStatus:
+      type: string
+      enum:
+        - active
+        - inactive
+        - maintenance
+      example: active
+    DeviceConnectionStatus:
+      type: string
+      enum:
+        - online
+        - offline
+        - unknown
+      example: offline
+    DeviceProvisioningStatus:
+      type: string
+      enum:
+        - unclaimed
+        - claimed
+      example: unclaimed
+    Device:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65f1234567890abcdef12345
+        id:
+          type: string
+          example: 65f1234567890abcdef12345
+        company:
+          type: object
+        site:
+          type: object
+          nullable: true
+        deviceType:
+          type: object
+        owner:
+          type: object
+          nullable: true
+        name:
+          type: string
+          example: 'Demo Basic Light 01'
+        deviceCode:
+          type: string
+          example: LIGHT-001
+        hardwareId:
+          type: string
+          example: ATL-LIGHT-0001
+        serialNumber:
+          type: string
+          nullable: true
+          example: SN-LIGHT-0001
+        macAddress:
+          type: string
+          nullable: true
+          example: 'AA:BB:CC:DD:EE:01'
+        firmwareVersion:
+          type: string
+          nullable: true
+          example: 1.0.0
+        mqttTopicBase:
+          type: string
+          nullable: true
+          example: archid/basic-light/atl-light-0001
+        provisioningStatus:
+          $ref: '#/components/schemas/DeviceProvisioningStatus'
+        operationalStatus:
+          $ref: '#/components/schemas/DeviceOperationalStatus'
+        connectionStatus:
+          $ref: '#/components/schemas/DeviceConnectionStatus'
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastHeartbeatAt:
+          type: string
+          format: date-time
+          nullable: true
+        liveState:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateDeviceRequest:
+      type: object
+      required:
+        - deviceType
+        - name
+        - deviceCode
+        - hardwareId
+      properties:
+        company:
+          type: string
+          description: 'Required for super_admin. customer_admin uses assigned company.'
+        site:
+          type: string
+          nullable: true
+        deviceType:
+          type: string
+        owner:
+          type: string
+          nullable: true
+        name:
+          type: string
+        deviceCode:
+          type: string
+        hardwareId:
+          type: string
+        serialNumber:
+          type: string
+          nullable: true
+        macAddress:
+          type: string
+          nullable: true
+        firmwareVersion:
+          type: string
+          nullable: true
+        mqttTopicBase:
+          type: string
+          nullable: true
+        provisioningStatus:
+          $ref: '#/components/schemas/DeviceProvisioningStatus'
+        operationalStatus:
+          $ref: '#/components/schemas/DeviceOperationalStatus'
+        connectionStatus:
+          $ref: '#/components/schemas/DeviceConnectionStatus'
+        liveState:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+        notes:
+          type: string
+          nullable: true
+    UpdateDeviceRequest:
+      allOf:
+        -
+          $ref: '#/components/schemas/CreateDeviceRequest'
+    UpdateDeviceStatusRequest:
+      type: object
+      required:
+        - operationalStatus
+      properties:
+        operationalStatus:
+          $ref: '#/components/schemas/DeviceOperationalStatus'
+    UpdateDeviceLiveStateRequest:
+      type: object
+      properties:
+        connectionStatus:
+          $ref: '#/components/schemas/DeviceConnectionStatus'
+        liveState:
+          type: object
+          additionalProperties: true
+        lastSeenAt:
+          type: string
+          format: date-time
+        lastHeartbeatAt:
+          type: string
+          format: date-time
+    DeviceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Device fetched successfully'
+        data:
+          type: object
+          properties:
+            device:
+              $ref: '#/components/schemas/Device'
+    DeviceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Devices fetched successfully'
+        data:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 1
+            totalPages:
+              type: integer
+              example: 1
+            devices:
+              type: array
+              items:
+                $ref: '#/components/schemas/Device'

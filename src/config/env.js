@@ -22,7 +22,7 @@ const config = {
   apiVersion: process.env.API_VERSION || "v1",
 
   port: toNumber(process.env.PORT, 4100),
-  apiBaseUrl: process.env.API_BASE_URL || "http://localhost:4100",
+  apiBaseUrl: process.env.API_BASE_URL || "http://localhost:4000",
   clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
 
   // ✅ This line fixes your current error
