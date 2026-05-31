@@ -47,17 +47,36 @@ const startServer = async () => {
       console.log(`📍 Sites Base: ${config.apiBaseUrl}/api/${config.apiVersion}/sites`);
       console.log(`🧩 Device Types Base: ${config.apiBaseUrl}/api/${config.apiVersion}/device-types`);
       console.log(`💡 Devices Base: ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
+      console.log(`🏭 Provisioning Base: ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning`);
 
       console.log("====================================");
-      console.log("🏭 Phase 06 Device Lifecycle Routes");
+      console.log("💡 Phase 06 Device Routes");
       console.log("====================================");
-      console.log(`🏷️ Pre-register Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices/pre-register`);
-      console.log(`✅ Start QC: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/qc/start`);
-      console.log(`🧪 Record QC Result: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/qc/result`);
-      console.log(`🔄 Reset Customer Provisioning: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/reset-customer-provisioning`);
-      console.log(`📲 Claim Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices/claim`);
+      console.log(`📋 List Devices: GET ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
+      console.log(`🔎 Get Device: GET ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId`);
+      console.log(`➕ Create Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
+      console.log(`✏️ Update Device: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId`);
+      console.log(`⚙️ Update Status: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/status`);
       console.log(`📡 Update Connection: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/connection`);
       console.log(`📊 Update Live State: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/live-state`);
+
+      console.log("====================================");
+      console.log("🏭 Phase 07 Provisioning Routes");
+      console.log("====================================");
+      console.log(`🏷️ Factory Register: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/factory-register`);
+      console.log(`✅ Start QC: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/qc/start`);
+      console.log(`🧪 Record QC Result: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/qc/result`);
+      console.log(`🔄 Reset Customer Provisioning: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/reset-customer-provisioning`);
+      console.log(`🔍 Claim Preview: GET ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/claim-preview?hardwareId=DEVICE_ID`);
+      console.log(`📲 Claim Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/claim`);
+      console.log(`🟢 Activate Device: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/activate`);
+
+      console.log("====================================");
+      console.log("🔮 Future Phases");
+      console.log("====================================");
+      console.log("Phase 08: Device sharing and permissions");
+      console.log("Phase 09: MQTT core listener/publisher");
+      console.log("Phase 10: Realtime REST-to-MQTT control");
 
       console.log("====================================");
       console.log("✅ Server Ready");
@@ -67,7 +86,7 @@ const startServer = async () => {
     // ==========================
     // SERVER ERROR HANDLING
     // ==========================
-    server.on("error", (error) => {
+    server.on("error", error => {
       if (error.code === "EADDRINUSE") {
         console.error(`❌ Port ${config.port} is already in use`);
       } else {
@@ -80,9 +99,6 @@ const startServer = async () => {
     // ==========================
     // FUTURE PHASES
     // ==========================
-    // Phase 07 / 08:
-    // Provisioning, customer onboarding, and device claim refinement.
-    //
     // Phase 09:
     // Start MQTT only after DB is connected.
     // require("./mqtt/mqtt.listener").startMqttListener();
@@ -94,7 +110,7 @@ const startServer = async () => {
   }
 };
 
-const shutdown = async (signal) => {
+const shutdown = async signal => {
   if (isShuttingDown) {
     return;
   }
@@ -113,7 +129,7 @@ const shutdown = async (signal) => {
     // CLOSE HTTP SERVER
     // ==========================
     if (server) {
-      await new Promise((resolve) => {
+      await new Promise(resolve => {
         server.close(() => {
           console.log("💤 HTTP server closed");
           resolve();
@@ -147,12 +163,12 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 // ==========================
 // PROCESS ERROR HANDLING
 // ==========================
-process.on("unhandledRejection", (reason) => {
+process.on("unhandledRejection", reason => {
   console.error("❌ Unhandled Rejection:", reason);
   shutdown("UNHANDLED_REJECTION");
 });
 
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", error => {
   console.error("❌ Uncaught Exception:", error);
   shutdown("UNCAUGHT_EXCEPTION");
 });
