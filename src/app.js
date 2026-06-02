@@ -32,6 +32,9 @@ const deviceRoutes = require("./modules/devices/device.routes");
 // Phase 07 Routes
 const provisioningRoutes = require("./modules/provisioning/provisioning.routes");
 
+// Phase 08 Routes
+const deviceSharingRoutes = require("./modules/deviceSharing/deviceShare.routes");
+
 const app = express();
 
 // ==========================
@@ -115,7 +118,8 @@ app.get("/", (req, res) => {
       sites: `/api/${config.apiVersion}/sites`,
       deviceTypes: `/api/${config.apiVersion}/device-types`,
       devices: `/api/${config.apiVersion}/devices`,
-      provisioning: `/api/${config.apiVersion}/provisioning`
+      provisioning: `/api/${config.apiVersion}/provisioning`,
+      deviceSharing: `/api/${config.apiVersion}/device-sharing`
     }
   });
 });
@@ -175,6 +179,7 @@ app.get("/sitemap.xml", (req, res) => {
 // /api/v1/device-types
 // /api/v1/devices
 // /api/v1/provisioning
+// /api/v1/device-sharing
 
 app.use(`/api/${config.apiVersion}/auth`, authRoutes);
 app.use(`/api/${config.apiVersion}/profile`, profileRoutes);
@@ -193,6 +198,9 @@ app.use(`/api/${config.apiVersion}/devices`, deviceRoutes);
 // Phase 07 Routes
 app.use(`/api/${config.apiVersion}/provisioning`, provisioningRoutes);
 
+// Phase 08 Routes
+app.use(`/api/${config.apiVersion}/device-sharing`, deviceSharingRoutes);
+
 // ==========================
 // SWAGGER DOCS
 // ==========================
@@ -205,7 +213,6 @@ app.get("/api-docs.json", (req, res) => {
 // ==========================
 // FUTURE API ROUTES
 // ==========================
-// app.use(`/api/${config.apiVersion}/device-sharing`, deviceSharingRoutes);
 // app.use(`/api/${config.apiVersion}/mqtt-access`, mqttAccessRoutes);
 
 // ==========================
