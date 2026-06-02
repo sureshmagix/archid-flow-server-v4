@@ -6,6 +6,10 @@ const Site = require("../sites/site.model");
 const User = require("../users/user.model");
 const { DeviceType } = require("../deviceTypes/deviceType.model");
 const { Device } = require("./device.model");
+const {
+  DeviceShare,
+  DEVICE_SHARE_PERMISSION_WEIGHT
+} = require("../deviceSharing/deviceShare.model");
 
 const ApiError = require("../../common/utils/ApiError");
 const sendResponse = require("../../common/utils/sendResponse");
@@ -99,7 +103,53 @@ const handleDuplicateDevice = error => {
   throw error;
 };
 
-const assertDeviceAccess = (req, device) => {
+const getObjectId = value => value?._id || value;
+
+const getDeviceCompanyId = device => getObjectId(device?.company);
+
+const getDeviceOwnerId = device => getObjectId(device?.owner);
+
+const activeShareConditions = () => ({
+  status: "active",
+  $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }]
+});
+
+const getAllowedSharePermissions = requiredPermission => {
+  const requiredWeight = DEVICE_SHARE_PERMISSION_WEIGHT[requiredPermission] || 0;
+
+  return Object.entries(DEVICE_SHARE_PERMISSION_WEIGHT)
+    .filter(([, weight]) => weight >= requiredWeight)
+    .map(([permission]) => permission);
+};
+
+const hasActiveDeviceSharePermission = async ({ deviceId, userId, permission }) => {
+  if (!deviceId || !userId || !permission) {
+    return false;
+  }
+
+  const share = await DeviceShare.findOne({
+    device: deviceId,
+    sharedWith: userId,
+    permission: { $in: getAllowedSharePermissions(permission) },
+    ...activeShareConditions()
+  });
+
+  return Boolean(share);
+};
+
+const getSharedDeviceIdsForUser = async ({ userId, permission }) => {
+  if (!userId || !permission) {
+    return [];
+  }
+
+  return DeviceShare.find({
+    sharedWith: userId,
+    permission: { $in: getAllowedSharePermissions(permission) },
+    ...activeShareConditions()
+  }).distinct("device");
+};
+
+const assertDeviceAccess = async (req, device, requiredPermission = "view") => {
   if (isSuperAdmin(req.user)) {
     return;
   }
@@ -108,27 +158,54 @@ const assertDeviceAccess = (req, device) => {
     throw new ApiError(403, "Logged-in user is not assigned to any company");
   }
 
-  const deviceCompanyId = device.company?._id || device.company;
+  const deviceCompanyId = getDeviceCompanyId(device);
 
-  if (String(req.user.company) !== String(deviceCompanyId)) {
+  if (!deviceCompanyId || String(req.user.company) !== String(deviceCompanyId)) {
     throw new ApiError(403, "You do not have permission to access this device");
   }
+
+  if (isCustomerAdmin(req.user)) {
+    return;
+  }
+
+  const deviceOwnerId = getDeviceOwnerId(device);
+
+  if (deviceOwnerId && String(deviceOwnerId) === String(req.user?._id)) {
+    return;
+  }
+
+  const hasSharePermission = await hasActiveDeviceSharePermission({
+    deviceId: device._id,
+    userId: req.user?._id,
+    permission: requiredPermission
+  });
+
+  if (hasSharePermission) {
+    return;
+  }
+
+  throw new ApiError(403, `You need ${requiredPermission} permission for this device`);
 };
 
-const assertCanManageDevice = req => {
+const assertCanManageDevice = async (req, device = null) => {
   if (isSuperAdmin(req.user) || isCustomerAdmin(req.user)) {
     return;
   }
 
-  throw new ApiError(403, "Only super_admin or customer_admin can manage devices");
-};
-
-const assertCanControlDevice = req => {
-  if (isSuperAdmin(req.user) || isCustomerAdmin(req.user) || isCustomerControlUser(req.user)) {
+  if (device) {
+    await assertDeviceAccess(req, device, "admin");
     return;
   }
 
-  throw new ApiError(403, "You do not have permission to control this device");
+  throw new ApiError(403, "Only super_admin or customer_admin can create devices");
+};
+
+const assertCanControlDevice = async (req, device) => {
+  if (isSuperAdmin(req.user) || isCustomerAdmin(req.user)) {
+    return;
+  }
+
+  await assertDeviceAccess(req, device, "control");
 };
 
 const assertCanClaimDevice = req => {
@@ -353,7 +430,7 @@ const preRegisterDevice = async (req, res) => {
 // PHASE 06 - DIRECT DEVICE CREATE
 // ==========================
 const createDevice = async (req, res) => {
-  assertCanManageDevice(req);
+  await assertCanManageDevice(req);
 
   const payload = req.body || {};
   const company = await resolveCompanyForCreate(req);
@@ -449,6 +526,7 @@ const listDevices = async (req, res) => {
   const skip = (page - 1) * limit;
 
   const filter = {};
+  const andConditions = [];
 
   if (isSuperAdmin(req.user)) {
     if (req.query.company) {
@@ -466,6 +544,20 @@ const listDevices = async (req, res) => {
     }
 
     filter.company = req.user.company;
+
+    if (!isCustomerAdmin(req.user)) {
+      const sharedDeviceIds = await getSharedDeviceIdsForUser({
+        userId: req.user._id,
+        permission: "view"
+      });
+
+      andConditions.push({
+        $or: [
+          { owner: req.user._id },
+          { _id: { $in: sharedDeviceIds } }
+        ]
+      });
+    }
   }
 
   const directFilters = [
@@ -495,17 +587,23 @@ const listDevices = async (req, res) => {
   if (req.query.q) {
     const regex = new RegExp(escapeRegex(req.query.q), "i");
 
-    filter.$or = [
-      { name: regex },
-      { displayName: regex },
-      { deviceCode: regex },
-      { hardwareId: regex },
-      { serialNumber: regex },
-      { macAddress: regex },
-      { firmwareVersion: regex },
-      { mqttTopicBase: regex },
-      { batchNumber: regex }
-    ];
+    andConditions.push({
+      $or: [
+        { name: regex },
+        { displayName: regex },
+        { deviceCode: regex },
+        { hardwareId: regex },
+        { serialNumber: regex },
+        { macAddress: regex },
+        { firmwareVersion: regex },
+        { mqttTopicBase: regex },
+        { batchNumber: regex }
+      ]
+    });
+  }
+
+  if (andConditions.length > 0) {
+    filter.$and = andConditions;
   }
 
   const [devices, total] = await Promise.all([
@@ -537,7 +635,7 @@ const getDeviceById = async (req, res) => {
     throw new ApiError(404, "Device not found");
   }
 
-  assertDeviceAccess(req, device);
+  await assertDeviceAccess(req, device, "view");
 
   return sendResponse(res, 200, "Device fetched successfully", {
     device
@@ -548,8 +646,6 @@ const getDeviceById = async (req, res) => {
 // UPDATE DEVICE
 // ==========================
 const updateDevice = async (req, res) => {
-  assertCanManageDevice(req);
-
   const { deviceId } = req.params;
   const payload = req.body || {};
 
@@ -560,7 +656,7 @@ const updateDevice = async (req, res) => {
   }
 
   ensureLifecycleObjects(device);
-  assertDeviceAccess(req, device);
+  await assertCanManageDevice(req, device);
 
   let targetCompanyId = device.company;
 
@@ -706,8 +802,6 @@ const updateDevice = async (req, res) => {
 // UPDATE OPERATIONAL STATUS
 // ==========================
 const updateDeviceStatus = async (req, res) => {
-  assertCanManageDevice(req);
-
   const { deviceId } = req.params;
   const { operationalStatus } = req.body;
 
@@ -717,7 +811,7 @@ const updateDeviceStatus = async (req, res) => {
     throw new ApiError(404, "Device not found");
   }
 
-  assertDeviceAccess(req, device);
+  await assertCanManageDevice(req, device);
 
   device.operationalStatus = operationalStatus;
   device.updatedBy = req.user._id;
@@ -957,8 +1051,6 @@ const claimDevice = async (req, res) => {
 // UPDATE LIVE STATE
 // ==========================
 const updateDeviceLiveState = async (req, res) => {
-  assertCanControlDevice(req);
-
   const { deviceId } = req.params;
   const payload = req.body || {};
 
@@ -969,7 +1061,7 @@ const updateDeviceLiveState = async (req, res) => {
   }
 
   ensureLifecycleObjects(device);
-  assertDeviceAccess(req, device);
+  await assertCanControlDevice(req, device);
 
   if (payload.connectionStatus) {
     device.connectionStatus = payload.connectionStatus;
@@ -1011,8 +1103,6 @@ const updateDeviceLiveState = async (req, res) => {
 // UPDATE CONNECTION
 // ==========================
 const updateDeviceConnection = async (req, res) => {
-  assertCanControlDevice(req);
-
   const { deviceId } = req.params;
   const payload = req.body || {};
 
@@ -1023,7 +1113,7 @@ const updateDeviceConnection = async (req, res) => {
   }
 
   ensureLifecycleObjects(device);
-  assertDeviceAccess(req, device);
+  await assertCanControlDevice(req, device);
 
   if (payload.connectionStatus) {
     device.connectionStatus = payload.connectionStatus;

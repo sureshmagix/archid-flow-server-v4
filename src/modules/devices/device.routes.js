@@ -140,13 +140,17 @@ router.patch(
 // ==========================
 // CONNECTION STATUS UPDATE
 // ==========================
+// Controller enforces Phase 08 device sharing permission:
+// - super_admin and customer_admin can update
+// - users with active control/admin share can update
 router.patch(
   "/:deviceId/connection",
   authMiddleware,
   requireRole(
     ROLES.SUPER_ADMIN,
     ROLES.CUSTOMER_ADMIN,
-    ROLES.CUSTOMER_CONTROL_USER
+    ROLES.CUSTOMER_CONTROL_USER,
+    ROLES.CUSTOMER_VIEW_USER
   ),
   validate(updateDeviceConnectionValidation),
   asyncHandler(updateDeviceConnection)
@@ -155,13 +159,17 @@ router.patch(
 // ==========================
 // LIVE STATE UPDATE
 // ==========================
+// Controller enforces Phase 08 device sharing permission:
+// - super_admin and customer_admin can update
+// - users with active control/admin share can update
 router.patch(
   "/:deviceId/live-state",
   authMiddleware,
   requireRole(
     ROLES.SUPER_ADMIN,
     ROLES.CUSTOMER_ADMIN,
-    ROLES.CUSTOMER_CONTROL_USER
+    ROLES.CUSTOMER_CONTROL_USER,
+    ROLES.CUSTOMER_VIEW_USER
   ),
   validate(updateDeviceLiveStateValidation),
   asyncHandler(updateDeviceLiveState)
@@ -170,10 +178,16 @@ router.patch(
 // ==========================
 // OPERATIONAL STATUS UPDATE
 // ==========================
+// Controller enforces Phase 08 admin permission.
 router.patch(
   "/:deviceId/status",
   authMiddleware,
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CUSTOMER_ADMIN),
+  requireRole(
+    ROLES.SUPER_ADMIN,
+    ROLES.CUSTOMER_ADMIN,
+    ROLES.CUSTOMER_CONTROL_USER,
+    ROLES.CUSTOMER_VIEW_USER
+  ),
   validate(updateDeviceStatusValidation),
   asyncHandler(updateDeviceStatus)
 );
@@ -199,10 +213,16 @@ router.get(
 // DEVICE UPDATE
 // Keep this after specific PATCH routes.
 // ==========================
+// Controller enforces Phase 08 admin permission.
 router.patch(
   "/:deviceId",
   authMiddleware,
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CUSTOMER_ADMIN),
+  requireRole(
+    ROLES.SUPER_ADMIN,
+    ROLES.CUSTOMER_ADMIN,
+    ROLES.CUSTOMER_CONTROL_USER,
+    ROLES.CUSTOMER_VIEW_USER
+  ),
   validate(updateDeviceValidation),
   asyncHandler(updateDevice)
 );
