@@ -12,7 +12,17 @@ const toBoolean = (value, defaultValue = false) => {
     return defaultValue;
   }
 
-  return String(value).toLowerCase() === "true";
+  const normalized = String(value).trim().toLowerCase();
+
+  if (["true", "1", "yes", "y"].includes(normalized)) {
+    return true;
+  }
+
+  if (["false", "0", "no", "n"].includes(normalized)) {
+    return false;
+  }
+
+  return defaultValue;
 };
 
 const config = {
@@ -21,11 +31,11 @@ const config = {
   appCode: process.env.APP_CODE || "archid-flow",
   apiVersion: process.env.API_VERSION || "v1",
 
-  port: toNumber(process.env.PORT, 4100),
+  host: process.env.HOST || "0.0.0.0",
+  port: toNumber(process.env.PORT, 4000),
+
   apiBaseUrl: process.env.API_BASE_URL || "http://localhost:4000",
   clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
-
-  // ✅ This line fixes your current error
   corsOrigin: process.env.CORS_ORIGIN || "*",
   showErrorStack: toBoolean(process.env.SHOW_ERROR_STACK, false),
 
@@ -39,9 +49,9 @@ const config = {
   mqtt: {
     namespace: process.env.MQTT_NAMESPACE || "archid",
     apiVersion: process.env.MQTT_API_VERSION || "v4",
-    url: process.env.MQTT_URL,
-    username: process.env.MQTT_USERNAME,
-    password: process.env.MQTT_PASSWORD,
+    url: process.env.MQTT_URL || "mqtt://127.0.0.1:1883",
+    username: process.env.MQTT_USERNAME || undefined,
+    password: process.env.MQTT_PASSWORD || undefined,
     reconnectPeriod: toNumber(process.env.MQTT_RECONNECT_PERIOD, 5000),
     connectTimeout: toNumber(process.env.MQTT_CONNECT_TIMEOUT, 30000),
     clean: toBoolean(process.env.MQTT_CLEAN, true),

@@ -7,7 +7,6 @@ const swaggerUi = require("swagger-ui-express");
 
 const config = require("./config/env");
 const swaggerDocument = require("./config/swagger");
-
 const sendResponse = require("./common/utils/sendResponse");
 const notFoundMiddleware = require("./common/middleware/notFound.middleware");
 const errorMiddleware = require("./common/middleware/error.middleware");
@@ -35,14 +34,14 @@ const provisioningRoutes = require("./modules/provisioning/provisioning.routes")
 // Phase 08 Routes
 const deviceSharingRoutes = require("./modules/deviceSharing/deviceShare.routes");
 
+// Phase 09 Routes
+const mqttRoutes = require("./modules/mqtt/mqtt.routes");
+
 const app = express();
 
 // ==========================
 // TRUST PROXY
 // ==========================
-// Required because production runs behind Nginx reverse proxy.
-// Flow: Client -> Nginx -> Express
-// This fixes express-rate-limit X-Forwarded-For warning.
 app.set("trust proxy", 1);
 
 // ==========================
@@ -119,7 +118,8 @@ app.get("/", (req, res) => {
       deviceTypes: `/api/${config.apiVersion}/device-types`,
       devices: `/api/${config.apiVersion}/devices`,
       provisioning: `/api/${config.apiVersion}/provisioning`,
-      deviceSharing: `/api/${config.apiVersion}/device-sharing`
+      deviceSharing: `/api/${config.apiVersion}/device-sharing`,
+      mqtt: `/api/${config.apiVersion}/mqtt/status`
     }
   });
 });
@@ -127,16 +127,12 @@ app.get("/", (req, res) => {
 // ==========================
 // BROWSER / SEO DEFAULT ROUTES
 // ==========================
-// Browsers automatically request /favicon.ico.
-// Search engines or tools may request /robots.txt and /sitemap.xml.
-// These routes prevent unnecessary 404 error logs.
 app.get("/favicon.ico", (req, res) => {
   return res.status(204).end();
 });
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-
   return res.send(`User-agent: *
 Allow: /
 
@@ -146,7 +142,6 @@ Sitemap: ${config.apiBaseUrl}/sitemap.xml
 
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml");
-
   return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -170,36 +165,20 @@ app.get("/sitemap.xml", (req, res) => {
 // ==========================
 // API ROUTES
 // ==========================
-// Example final URL when apiVersion = v1:
-// /api/v1/auth
-// /api/v1/profile
-// /api/v1/users
-// /api/v1/companies
-// /api/v1/sites
-// /api/v1/device-types
-// /api/v1/devices
-// /api/v1/provisioning
-// /api/v1/device-sharing
-
 app.use(`/api/${config.apiVersion}/auth`, authRoutes);
 app.use(`/api/${config.apiVersion}/profile`, profileRoutes);
 app.use(`/api/${config.apiVersion}/users`, userRoutes);
 
-// Phase 04 Routes
 app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
 app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
 
-// Phase 05 Routes
 app.use(`/api/${config.apiVersion}/device-types`, deviceTypeRoutes);
-
-// Phase 06 Routes
 app.use(`/api/${config.apiVersion}/devices`, deviceRoutes);
 
-// Phase 07 Routes
 app.use(`/api/${config.apiVersion}/provisioning`, provisioningRoutes);
-
-// Phase 08 Routes
 app.use(`/api/${config.apiVersion}/device-sharing`, deviceSharingRoutes);
+
+app.use(`/api/${config.apiVersion}/mqtt`, mqttRoutes);
 
 // ==========================
 // SWAGGER DOCS
@@ -213,7 +192,7 @@ app.get("/api-docs.json", (req, res) => {
 // ==========================
 // FUTURE API ROUTES
 // ==========================
-// app.use(`/api/${config.apiVersion}/mqtt-access`, mqttAccessRoutes);
+// Phase 10 will add REST-to-MQTT realtime control routes.
 
 // ==========================
 // 404 HANDLER
