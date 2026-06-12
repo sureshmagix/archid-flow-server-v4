@@ -4,13 +4,17 @@ const mongoose = require("mongoose");
 const app = require("./app");
 const config = require("./config/env");
 const connectDB = require("./config/db");
+const {
+  startMqttListener,
+  stopMqttListener
+} = require("./modules/mqtt/mqtt.listener");
 
 let server;
 let isShuttingDown = false;
 
 const startServer = async () => {
   try {
-    console.log("🚀 Starting Archid Flow Server V4...");
+    console.log(" Starting Archid Flow Server V4...");
 
     // ==========================
     // CONNECT DATABASE FIRST
@@ -18,65 +22,56 @@ const startServer = async () => {
     await connectDB();
 
     // ==========================
+    // START MQTT AFTER DB CONNECTION
+    // ==========================
+    startMqttListener();
+
+    // ==========================
     // START HTTP SERVER
     // ==========================
     server = http.createServer(app);
 
-    const host = config.host || "0.0.0.0";
-
-    server.listen(config.port, host, () => {
+    server.listen(config.port, config.host, () => {
       console.log("✅ Archid Flow Server V4 started successfully");
-      console.log(`✅ Server running on: ${host}:${config.port}`);
-      console.log(`🌍 Environment: ${config.nodeEnv}`);
-      console.log(`🧩 API Version: ${config.apiVersion}`);
+      console.log(`✅ Server running on: ${config.host}:${config.port}`);
+      console.log(` Environment: ${config.nodeEnv}`);
+      console.log(` API Version: ${config.apiVersion}`);
 
       console.log("====================================");
-      console.log("📘 Documentation");
+      console.log(" Documentation");
       console.log("====================================");
-      console.log(`📘 Swagger Docs: ${config.apiBaseUrl}/api-docs`);
-      console.log(`📄 Swagger JSON: ${config.apiBaseUrl}/api-docs.json`);
+      console.log(` Swagger Docs: ${config.apiBaseUrl}/api-docs`);
+      console.log(` Swagger JSON: ${config.apiBaseUrl}/api-docs.json`);
       console.log(`❤️ Health Check: ${config.apiBaseUrl}/health`);
 
       console.log("====================================");
-      console.log("🔗 API Base Routes");
+      console.log(" API Base Routes");
       console.log("====================================");
-      console.log(`🔐 Auth Base: ${config.apiBaseUrl}/api/${config.apiVersion}/auth`);
-      console.log(`👤 Profile Base: ${config.apiBaseUrl}/api/${config.apiVersion}/profile`);
-      console.log(`👥 Users Base: ${config.apiBaseUrl}/api/${config.apiVersion}/users`);
-      console.log(`🏢 Companies Base: ${config.apiBaseUrl}/api/${config.apiVersion}/companies`);
-      console.log(`📍 Sites Base: ${config.apiBaseUrl}/api/${config.apiVersion}/sites`);
-      console.log(`🧩 Device Types Base: ${config.apiBaseUrl}/api/${config.apiVersion}/device-types`);
-      console.log(`💡 Devices Base: ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
-      console.log(`🏭 Provisioning Base: ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning`);
+      console.log(` Auth Base: ${config.apiBaseUrl}/api/${config.apiVersion}/auth`);
+      console.log(` Profile Base: ${config.apiBaseUrl}/api/${config.apiVersion}/profile`);
+      console.log(` Users Base: ${config.apiBaseUrl}/api/${config.apiVersion}/users`);
+      console.log(` Companies Base: ${config.apiBaseUrl}/api/${config.apiVersion}/companies`);
+      console.log(` Sites Base: ${config.apiBaseUrl}/api/${config.apiVersion}/sites`);
+      console.log(` Device Types Base: ${config.apiBaseUrl}/api/${config.apiVersion}/device-types`);
+      console.log(` Devices Base: ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
+      console.log(` Provisioning Base: ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning`);
+      console.log(` Device Sharing Base: ${config.apiBaseUrl}/api/${config.apiVersion}/device-sharing`);
+      console.log(` MQTT Status: ${config.apiBaseUrl}/api/${config.apiVersion}/mqtt/status`);
 
       console.log("====================================");
-      console.log("💡 Phase 06 Device Routes");
+      console.log(" Phase 09 MQTT Core");
       console.log("====================================");
-      console.log(`📋 List Devices: GET ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
-      console.log(`🔎 Get Device: GET ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId`);
-      console.log(`➕ Create Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/devices`);
-      console.log(`✏️ Update Device: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId`);
-      console.log(`⚙️ Update Status: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/status`);
-      console.log(`📡 Update Connection: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/connection`);
-      console.log(`📊 Update Live State: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/devices/:deviceId/live-state`);
+      console.log("MQTT client: enabled");
+      console.log("MQTT listener: heartbeat/state/telemetry/ack");
+      console.log("MQTT publisher utility: ready");
+      console.log("Offline monitor: enabled");
 
       console.log("====================================");
-      console.log("🏭 Phase 07 Provisioning Routes");
+      console.log(" Future Phases");
       console.log("====================================");
-      console.log(`🏷️ Factory Register: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/factory-register`);
-      console.log(`✅ Start QC: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/qc/start`);
-      console.log(`🧪 Record QC Result: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/qc/result`);
-      console.log(`🔄 Reset Customer Provisioning: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/reset-customer-provisioning`);
-      console.log(`🔍 Claim Preview: GET ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/claim-preview?hardwareId=DEVICE_ID`);
-      console.log(`📲 Claim Device: POST ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/claim`);
-      console.log(`🟢 Activate Device: PATCH ${config.apiBaseUrl}/api/${config.apiVersion}/provisioning/devices/:deviceId/activate`);
-
-      console.log("====================================");
-      console.log("🔮 Future Phases");
-      console.log("====================================");
-      console.log("Phase 08: Device sharing and permissions");
-      console.log("Phase 09: MQTT core listener/publisher");
       console.log("Phase 10: Realtime REST-to-MQTT control");
+      console.log("Phase 11: Swagger/Postman cleanup");
+      console.log("Phase 12: Production deployment hardening");
 
       console.log("====================================");
       console.log("✅ Server Ready");
@@ -95,14 +90,6 @@ const startServer = async () => {
 
       shutdown("SERVER_ERROR");
     });
-
-    // ==========================
-    // FUTURE PHASES
-    // ==========================
-    // Phase 09:
-    // Start MQTT only after DB is connected.
-    // require("./mqtt/mqtt.listener").startMqttListener();
-    // require("./jobs/offline-monitor.job").startOfflineMonitor();
   } catch (error) {
     console.error("❌ Server startup failed:", error.message);
     console.error(error);
@@ -117,7 +104,7 @@ const shutdown = async signal => {
 
   isShuttingDown = true;
 
-  console.log(`\n🛑 ${signal} received. Shutting down gracefully...`);
+  console.log(`\n ${signal} received. Shutting down gracefully...`);
 
   const forceShutdownTimer = setTimeout(() => {
     console.error("⚠️ Forced shutdown after timeout");
@@ -131,18 +118,23 @@ const shutdown = async signal => {
     if (server) {
       await new Promise(resolve => {
         server.close(() => {
-          console.log("💤 HTTP server closed");
+          console.log(" HTTP server closed");
           resolve();
         });
       });
     }
 
     // ==========================
+    // CLOSE MQTT
+    // ==========================
+    await stopMqttListener();
+
+    // ==========================
     // CLOSE DATABASE CONNECTION
     // ==========================
     if (mongoose.connection.readyState !== 0) {
       await mongoose.connection.close();
-      console.log("💤 MongoDB connection closed");
+      console.log(" MongoDB connection closed");
     }
 
     clearTimeout(forceShutdownTimer);
