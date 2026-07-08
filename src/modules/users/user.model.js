@@ -13,8 +13,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true,
-      index: true
+      trim: true
     },
 
     email: {
@@ -22,8 +21,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      lowercase: true,
-      index: true
+      lowercase: true
     },
 
     password: {
@@ -118,7 +116,8 @@ const userSchema = new mongoose.Schema(
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      default: null
+      default: null,
+      index: true
     },
 
     isActive: {
@@ -134,6 +133,32 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true
+  }
+);
+
+// Prevent creating a customer_admin without company.
+userSchema.pre("validate", function (next) {
+  if (this.role === ROLES.CUSTOMER_ADMIN && !this.company) {
+    return next(new Error("Company is required for customer admin"));
+  }
+
+  if (this.role === ROLES.SUPER_ADMIN) {
+    this.company = null;
+  }
+
+  return next();
+});
+
+// One company can have only one customer_admin.
+// This is database-level safety against duplicate creation.
+userSchema.index(
+  { company: 1, role: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      role: ROLES.CUSTOMER_ADMIN,
+      company: { $type: "objectId" }
+    }
   }
 );
 
