@@ -34,25 +34,16 @@ const normalizeOptionalCode = value => {
 
 const normalizeHardwareId = value => normalizeCode(value);
 
-const normalizeTopicSegment = value =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
 const generateClaimCode = () => crypto.randomInt(100000, 1000000).toString();
 
 const buildQrPayload = (hardwareId, claimCode) => {
   return `archid://claim?hardwareId=${encodeURIComponent(hardwareId)}&claimCode=${encodeURIComponent(claimCode)}`;
 };
 
-const buildMqttTopicBase = (deviceType, hardwareId) => {
-  const typeSegment = normalizeTopicSegment(deviceType?.slug || deviceType?.category || "device");
-  const hardwareSegment = normalizeTopicSegment(hardwareId);
-
-  return `archid/${typeSegment}/${hardwareSegment}`;
-};
+const { buildDeviceBaseTopic } = require("../mqtt/mqtt.topics");
+const buildMqttTopicBase = (deviceType, hardwareId) => buildDeviceBaseTopic({
+  category: deviceType?.category || "device", hardwareId
+});
 
 const populateDeviceQuery = query =>
   query

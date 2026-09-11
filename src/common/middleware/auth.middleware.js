@@ -25,6 +25,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = user;
+    req.authExpiresAt = Number(decoded.exp) * 1000;
 
     return next();
   } catch (error) {

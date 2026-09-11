@@ -17,8 +17,10 @@
     "pm2:save": "pm2 save",
     "test": "node --test test/*.test.js",
     "test:postman": "node scripts/test-postman.js",
-    "postman:build": "node scripts/build-postman.js",
-    "db:check-indexes": "node scripts/check-indexes.js"
+    "postman:build": "node scripts/build-postman-mqtt.js",
+    "db:check-indexes": "node scripts/check-indexes.js",
+    "mqtt:guard": "node scripts/mqtt-access-guard.js",
+    "test:mqtt": "node scripts/test-mqtt-access.js"
   },
   "keywords": [
     "iot",

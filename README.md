@@ -50,3 +50,17 @@ The default command is read-only. `--create` adds declared indexes without dropp
 ## Next branch
 
 `phase-10-direct-mqtt-access` builds on this stabilization branch. The intended realtime path is app ↔ broker ↔ device. REST grants device access; it does not forward each command. Broker deployment and a real MQTT integration test remain required before production.
+
+## Phase 10 direct access
+
+See [direct MQTT access setup](docs/phase-10-direct-mqtt-access.md). The feature defaults to disabled until Mosquitto Dynamic Security and the independent supervised guard are configured.
+
+Import `postman/phase-10-direct-mqtt.postman_collection.json` with the same local environment to run the baseline plus grant/renew/revoke APIs. Use its collection variables for manual MQTT testing; it revokes the final credentials at the end. To keep a temporary session for manual checks, run the grant request again after the full collection, then explicitly revoke it when finished.
+
+```bash
+npm run mqtt:guard
+# Separate terminal, after guard/broker configuration:
+npm start
+```
+
+For production use the supplied systemd supervision instead of these foreground commands. New devices use the canonical Phase 09 topic format. Existing noncanonical topics require explicit migration; no production data is changed by checkout.
