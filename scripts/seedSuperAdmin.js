@@ -5,8 +5,6 @@ const connectDB = require("../src/config/db");
 const User = require("../src/modules/users/user.model");
 
 const SUPER_ADMIN_ROLE = "super_admin";
-const ACTIVE_STATUS = "active";
-
 const getRequiredEnv = (key) => {
   const value = process.env[key];
 
@@ -35,7 +33,7 @@ const buildSuperAdminPayload = async () => {
     email,
     password: hashedPassword,
     role: SUPER_ADMIN_ROLE,
-    accountStatus: ACTIVE_STATUS,
+    isActive: true,
     profile: {
       firstName,
       lastName,
@@ -88,7 +86,7 @@ const seedSuperAdmin = async () => {
       existingUser.mobile = payload.mobile;
       existingUser.email = payload.email;
       existingUser.role = SUPER_ADMIN_ROLE;
-      existingUser.accountStatus = ACTIVE_STATUS;
+      existingUser.isActive = true;
       existingUser.profile = {
         ...(existingUser.profile || {}),
         ...payload.profile
@@ -108,7 +106,7 @@ const seedSuperAdmin = async () => {
         mobile: existingUser.mobile,
         email: existingUser.email,
         role: existingUser.role,
-        accountStatus: existingUser.accountStatus
+        isActive: existingUser.isActive
       });
 
       return;
@@ -123,7 +121,7 @@ const seedSuperAdmin = async () => {
       mobile: superAdmin.mobile,
       email: superAdmin.email,
       role: superAdmin.role,
-      accountStatus: superAdmin.accountStatus
+      isActive: superAdmin.isActive
     });
   } catch (error) {
     console.error("❌ Super admin seed failed:", error.message);

@@ -33,7 +33,7 @@ npm run test:postman
 
 The Postman test runner creates a disposable MongoDB and HTTP server, seeds a temporary super admin, executes the committed collection and stops both. It never uses your production database. First run downloads a MongoDB test binary. Set `MONGOMS_SYSTEM_BINARY` to an installed compatible mongod if needed.
 
-For manual Postman use, import `postman/phase-09-baseline.postman_collection.json` and `postman/local.postman_environment.json`. Set `superAdminIdentifier`, `superAdminPassword` and `baseUrl`, select the environment, then run the complete collection **in order**. Tokens and record IDs are captured in collection variables. Use a test database: each run creates new records. QC inputs are simulated and do not prove hardware/MQTT operation. Clear collection variables after use because they contain test credentials and tokens.
+For manual Phase 01–10 testing, follow the [Postman guide](docs/postman-phase-01-to-10-guide.md). Import `postman/phase-10-direct-mqtt.postman_collection.json` and `postman/local.postman_environment.json`, then run the complete collection in order. Tokens and record IDs are captured automatically.
 
 Run `npm run postman:build` after editing the generator. The older Phase 05 collection is retained for compatibility; the empty Phase 03 placeholder is not a runnable collection.
 
