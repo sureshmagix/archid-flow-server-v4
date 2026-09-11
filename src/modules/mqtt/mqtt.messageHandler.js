@@ -80,6 +80,8 @@ const handleMqttMessage = async ({ topic, message, packet }) => {
   }
 
   const parsedPayload = parseJsonPayload(message);
+  if (!parsedPayload.ok) return { handled: false, reason: "INVALID_JSON" };
+  if (packet?.retain) return { handled: false, reason: "RETAINED_SNAPSHOT" };
   const payload = sanitizePayloadForDb(parsedPayload.data);
   const receivedAt = new Date();
 
@@ -101,7 +103,10 @@ const handleMqttMessage = async ({ topic, message, packet }) => {
     };
   }
 
-  const category = parsedTopic.category || device.deviceType?.category || "device";
+  const category = device.deviceType?.category || "device";
+  if (parsedTopic.category !== category || device.protocol !== "mqtt") {
+    return { handled: false, reason: "DEVICE_TOPIC_MISMATCH" };
+  }
 
   const setFields = {
     connectionStatus: "online",

@@ -1,7 +1,8 @@
 const config = require("../../config/env");
 
 const errorMiddleware = (err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || err.status || (err.code === 11000 || err.name === "VersionError" ? 409 :
+    ["ValidationError", "CastError"].includes(err.name) ? 400 : 500);
 
   const response = {
     success: false,

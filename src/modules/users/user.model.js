@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
     },
 
     profile: {
+      avatarUrl: { type: String, trim: true },
       firstName: {
         type: String,
         trim: true
@@ -89,6 +90,8 @@ const userSchema = new mongoose.Schema(
         }
       },
       professionalDetails: {
+        designation: { type: String, trim: true },
+        department: { type: String, trim: true },
         companyName: {
           type: String,
           trim: true
@@ -137,16 +140,14 @@ const userSchema = new mongoose.Schema(
 );
 
 // Prevent creating a customer_admin without company.
-userSchema.pre("validate", function (next) {
+userSchema.pre("validate", function () {
   if (this.role === ROLES.CUSTOMER_ADMIN && !this.company) {
-    return next(new Error("Company is required for customer admin"));
+    throw new Error("Company is required for customer admin");
   }
 
   if (this.role === ROLES.SUPER_ADMIN) {
     this.company = null;
   }
-
-  return next();
 });
 
 // One company can have only one customer_admin.

@@ -21,7 +21,7 @@ const getMqttRootTopic = () => {
 const buildDeviceBaseTopic = ({ category = "device", hardwareId }) => {
   const normalizedHardwareId = normalizeHardwareId(hardwareId);
 
-  if (!normalizedHardwareId) {
+  if (!/^[A-Z0-9_-]{2,120}$/.test(normalizedHardwareId)) {
     throw new Error("hardwareId is required to build MQTT device topic");
   }
 
@@ -79,7 +79,7 @@ const getDeviceSubscriptionTopics = () => {
 };
 
 const parseDeviceTopic = topic => {
-  const parts = String(topic || "").split("/").filter(Boolean);
+  const parts = String(topic || "").split("/");
   const rootParts = getMqttRootTopic().split("/");
 
   const result = {

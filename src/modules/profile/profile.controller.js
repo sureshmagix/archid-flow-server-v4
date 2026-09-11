@@ -3,6 +3,8 @@ const ApiError = require("../../common/utils/ApiError");
 
 const restrictedFields = [
   "password",
+  "company",
+  "isActive",
   "role",
   "accountStatus",
   "isVerified",
@@ -74,7 +76,8 @@ const updateMyProfile = async (req, res) => {
   const body = req.body || {};
 
   const hasRestrictedField = restrictedFields.some(field =>
-    Object.prototype.hasOwnProperty.call(body, field)
+    Object.prototype.hasOwnProperty.call(body, field) ||
+    Object.prototype.hasOwnProperty.call(body.profile || {}, field)
   );
 
   if (hasRestrictedField) {
@@ -94,6 +97,12 @@ const updateMyProfile = async (req, res) => {
           ...body.profile
         }
       : body;
+
+  for (const key of ["name", "email", "mobile", "firstName", "lastName", "avatarUrl"]) {
+    if (profileInput[key] !== undefined && typeof profileInput[key] !== "string") {
+      throw new ApiError(400, `${key} must be a string`);
+    }
+  }
 
   if (!user.profile) {
     user.profile = {};

@@ -56,7 +56,7 @@ const listCompanies = async (req, res) => {
       return sendResponse(res, 200, "Companies fetched successfully", {
         page,
         limit,
-        total,
+        total: 0,
         totalPages: 0,
         companies: []
       });
@@ -160,40 +160,10 @@ const updateCompany = async (req, res) => {
 };
 
 const assignUserToCompany = async (req, res) => {
-  const { companyId } = req.params;
-  const { userId, role } = req.body || {};
-
-  const company = await Company.findById(companyId);
-
-  if (!company) {
-    throw new ApiError(404, "Company not found");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new ApiError(400, "Invalid user ID");
-  }
-
-  const user = await User.findById(userId);
-
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-
-  if (user.role === ROLES.SUPER_ADMIN) {
-    throw new ApiError(400, "super_admin cannot be assigned to a customer company");
-  }
-
-  user.company = company._id;
-
-  if (role) {
-    user.role = role;
-  }
-
-  await user.save();
-
-  return sendResponse(res, 200, "User assigned to company successfully", {
-    user: user.toSafeObject ? user.toSafeObject() : user
+  const user = await require("../users/user.service").assignUserToCompany({
+    userId: req.body.userId, companyId: req.params.companyId, role: req.body.role
   });
+  return sendResponse(res, 200, "User assigned to company successfully", { user });
 };
 
 module.exports = {

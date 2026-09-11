@@ -188,25 +188,12 @@ const assertDeviceAccess = async (req, device, requiredPermission = "view") => {
 };
 
 const assertCanManageDevice = async (req, device = null) => {
-  if (isSuperAdmin(req.user) || isCustomerAdmin(req.user)) {
-    return;
-  }
-
-  if (device) {
-    await assertDeviceAccess(req, device, "admin");
-    return;
-  }
-
+  if (device) return assertDeviceAccess(req, device, "admin");
+  if (isSuperAdmin(req.user) || isCustomerAdmin(req.user)) return;
   throw new ApiError(403, "Only super_admin or customer_admin can create devices");
 };
 
-const assertCanControlDevice = async (req, device) => {
-  if (isSuperAdmin(req.user) || isCustomerAdmin(req.user)) {
-    return;
-  }
-
-  await assertDeviceAccess(req, device, "control");
-};
+const assertCanControlDevice = (req, device) => assertDeviceAccess(req, device, "control");
 
 const assertCanClaimDevice = req => {
   if (isCustomerAdmin(req.user)) {

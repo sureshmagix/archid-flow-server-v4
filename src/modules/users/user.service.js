@@ -116,6 +116,7 @@ const ensureCompanyExists = async companyId => {
     throw new ApiError(404, "Company not found");
   }
 
+  if (company.status !== "active") throw new ApiError(403, "Company is not active");
   return company;
 };
 

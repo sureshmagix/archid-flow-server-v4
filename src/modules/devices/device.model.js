@@ -452,6 +452,7 @@ const deviceSchema = new mongoose.Schema(
     }
   },
   {
+    optimisticConcurrency: true,
     timestamps: true
   }
 );
