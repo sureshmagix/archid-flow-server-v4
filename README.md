@@ -33,7 +33,7 @@ npm run test:postman
 
 The Postman test runner creates a disposable MongoDB and HTTP server, seeds a temporary super admin, executes the committed collection and stops both. It never uses your production database. First run downloads a MongoDB test binary. Set `MONGOMS_SYSTEM_BINARY` to an installed compatible mongod if needed.
 
-For manual Postman use, import `postman/phase-09-baseline.postman_collection.json` and `postman/local.postman_environment.json`. Set `superAdminIdentifier`, `superAdminPassword` and `baseUrl`, select the environment, then run the complete collection **in order**. Tokens and record IDs are captured in collection variables. Use a test database: each run creates new records. QC inputs are simulated and do not prove hardware/MQTT operation. Clear collection variables after use because they contain test credentials and tokens.
+For manual Phase 01–10 testing, follow the [Postman guide](docs/postman-phase-01-to-10-guide.md). Import `postman/phase-10-direct-mqtt.postman_collection.json` and `postman/local.postman_environment.json`, then run the complete collection in order. Tokens and record IDs are captured automatically.
 
 Run `npm run postman:build` after editing the generator. The older Phase 05 collection is retained for compatibility; the empty Phase 03 placeholder is not a runnable collection.
 
@@ -50,3 +50,17 @@ The default command is read-only. `--create` adds declared indexes without dropp
 ## Next branch
 
 `phase-10-direct-mqtt-access` builds on this stabilization branch. The intended realtime path is app ↔ broker ↔ device. REST grants device access; it does not forward each command. Broker deployment and a real MQTT integration test remain required before production.
+
+## Phase 10 direct access
+
+See [direct MQTT access setup](docs/phase-10-direct-mqtt-access.md). The feature defaults to disabled until Mosquitto Dynamic Security and the independent supervised guard are configured.
+
+Import `postman/phase-10-direct-mqtt.postman_collection.json` with the same local environment to run the baseline plus grant/renew/revoke APIs. Use its collection variables for manual MQTT testing; it revokes the final credentials at the end. To keep a temporary session for manual checks, run the grant request again after the full collection, then explicitly revoke it when finished.
+
+```bash
+npm run mqtt:guard
+# Separate terminal, after guard/broker configuration:
+npm start
+```
+
+For production use the supplied systemd supervision instead of these foreground commands. New devices use the canonical Phase 09 topic format. Existing noncanonical topics require explicit migration; no production data is changed by checkout.

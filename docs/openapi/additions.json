@@ -60,6 +60,172 @@
           }
         }
       }
+    },
+    "/api/v1/devices/{deviceId}/mqtt-access": {
+      "post": {
+        "tags": [
+          "MQTT Access"
+        ],
+        "summary": "Grant direct MQTT credentials for a device",
+        "description": "Credentials authorize app-to-broker traffic directly. No realtime messages pass through this REST endpoint. Requires configured Dynamic Security and a healthy independent access guard. See docs/phase-10-direct-mqtt-access.md.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Credentials in data.access (POST); revocation confirmation (DELETE). No-store response."
+          },
+          "400": {
+            "description": "Invalid ID or non-empty request body"
+          },
+          "401": {
+            "description": "Authentication required or expiring"
+          },
+          "403": {
+            "description": "Device access denied"
+          },
+          "404": {
+            "description": "Device or caller-owned session not found"
+          },
+          "409": {
+            "description": "Topic or permissions changed"
+          },
+          "429": {
+            "description": "Too many sessions or requests"
+          },
+          "503": {
+            "description": "Disabled, guard unhealthy or broker unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/devices/{deviceId}/mqtt-access/{sessionId}/renew": {
+      "post": {
+        "tags": [
+          "MQTT Access"
+        ],
+        "summary": "Rotate direct MQTT access",
+        "description": "Credentials authorize app-to-broker traffic directly. No realtime messages pass through this REST endpoint. Requires configured Dynamic Security and a healthy independent access guard. See docs/phase-10-direct-mqtt-access.md.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Credentials in data.access (POST); revocation confirmation (DELETE). No-store response."
+          },
+          "400": {
+            "description": "Invalid ID or non-empty request body"
+          },
+          "401": {
+            "description": "Authentication required or expiring"
+          },
+          "403": {
+            "description": "Device access denied"
+          },
+          "404": {
+            "description": "Device or caller-owned session not found"
+          },
+          "409": {
+            "description": "Topic or permissions changed"
+          },
+          "429": {
+            "description": "Too many sessions or requests"
+          },
+          "503": {
+            "description": "Disabled, guard unhealthy or broker unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/devices/{deviceId}/mqtt-access/{sessionId}": {
+      "delete": {
+        "tags": [
+          "MQTT Access"
+        ],
+        "summary": "Revoke direct MQTT access",
+        "description": "Credentials authorize app-to-broker traffic directly. No realtime messages pass through this REST endpoint. Requires configured Dynamic Security and a healthy independent access guard. See docs/phase-10-direct-mqtt-access.md.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credentials in data.access (POST); revocation confirmation (DELETE). No-store response."
+          },
+          "400": {
+            "description": "Invalid ID or non-empty request body"
+          },
+          "401": {
+            "description": "Authentication required or expiring"
+          },
+          "403": {
+            "description": "Device access denied"
+          },
+          "404": {
+            "description": "Device or caller-owned session not found"
+          },
+          "409": {
+            "description": "Topic or permissions changed"
+          },
+          "429": {
+            "description": "Too many sessions or requests"
+          },
+          "503": {
+            "description": "Disabled, guard unhealthy or broker unavailable"
+          }
+        }
+      }
     }
   }
 }

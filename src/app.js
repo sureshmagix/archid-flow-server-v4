@@ -173,6 +173,7 @@ app.use(`/api/${config.apiVersion}/companies`, companyRoutes);
 app.use(`/api/${config.apiVersion}/sites`, siteRoutes);
 
 app.use(`/api/${config.apiVersion}/device-types`, deviceTypeRoutes);
+app.use(`/api/${config.apiVersion}/devices/:deviceId/mqtt-access`, require("./modules/mqttAccess/access.routes"));
 app.use(`/api/${config.apiVersion}/devices`, deviceRoutes);
 
 app.use(`/api/${config.apiVersion}/provisioning`, provisioningRoutes);

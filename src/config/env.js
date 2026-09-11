@@ -59,6 +59,16 @@ const config = {
     accessTtlSeconds: toNumber(process.env.MQTT_ACCESS_TTL_SECONDS, 900)
   },
 
+  mqttAccess: {
+    enabled: toBoolean(process.env.MQTT_ACCESS_ENABLED, false),
+    adminUrl: process.env.MQTT_DYNSEC_URL || "mqtt://127.0.0.1:1883",
+    adminUsername: process.env.MQTT_DYNSEC_USERNAME,
+    adminPassword: process.env.MQTT_DYNSEC_PASSWORD,
+    timeoutMs: 5000,
+    guardIntervalMs: 5000,
+    guardMaxAgeMs: 15000
+  },
+
   deviceMonitoring: {
     offlineThresholdSeconds: toNumber(process.env.DEVICE_OFFLINE_THRESHOLD_SECONDS, 60),
     offlineCheckIntervalSeconds: toNumber(process.env.DEVICE_OFFLINE_CHECK_INTERVAL_SECONDS, 30)

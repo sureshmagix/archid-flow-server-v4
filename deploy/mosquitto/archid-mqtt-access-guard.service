@@ -1,0 +1,19 @@
+[Unit]
+Description=Archid MQTT access expiry and revocation guard
+After=network.target
+
+[Service]
+# Broker must be allowed to start while guard is connecting to it.
+Type=simple
+User=archid
+WorkingDirectory=/opt/archid-flow-server-v4
+EnvironmentFile=/opt/archid-flow-server-v4/.env
+ExecStart=/usr/bin/node scripts/mqtt-access-guard.js
+NotifyAccess=all
+WatchdogSec=30
+TimeoutStopSec=15
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
